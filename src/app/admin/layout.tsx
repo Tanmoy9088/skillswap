@@ -1,19 +1,20 @@
-import Navbar from '@/layout/admin/Navbar'
-import Sidebar from '@/layout/admin/Sidebar'
-import React from 'react'
+import Navbar from "@/layout/adminLayout/Navbar";
+import Sidebar from "@/layout/adminLayout/Sidebar";
+import React from "react";
 
-const AdminLayout = () => {
+const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
-    <div className='w-full'>
-        <Navbar/>
-        <Sidebar/>
-        
+    <div className="min-h-screen bg-[#f8f9ff]">
+      {/* Sidebar */}
+      <Sidebar />
 
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Main Content */}
+      <main className="ml-72 pt-12">{children}</main>
     </div>
+  );
+};
 
-    </>
-  )
-}
-
-export default AdminLayout
+export default AdminLayout;
