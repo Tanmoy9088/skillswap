@@ -110,7 +110,7 @@ const Header = () => {
 
           <div className="flex items-center gap-5">
             {isLoading ? (
-              <p>Loading...</p>
+              <div className="h-14 w-14 animate-pulse rounded-full bg-gray-200" />
             ) : profile ? (
               <>
                 <div className="flex gap-2 w-full">
@@ -128,7 +128,9 @@ const Header = () => {
                     />
                   </button>
                   <div className="flex flex-col justify-center items-center bg-blue-50 shadow-lg p-2 rounded-xl">
-                    <h3 className="font-bold tracking-tigher text-sm">{profile.name}</h3>
+                    <h3 className="font-bold tracking-tigher text-sm">
+                      {profile.name}
+                    </h3>
                     <h4 className="font-light text-xs">{profile.email}</h4>
                   </div>
                 </div>

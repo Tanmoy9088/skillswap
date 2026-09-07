@@ -56,9 +56,19 @@ export async function proxy(request: NextRequest) {
     // Get current user's profile
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, is_Active")
       .eq("auth_user_id", user.id)
       .single();
+
+    // =========================
+    // DEACTIVATED USER
+    // =========================
+
+    if (profile && !profile.is_Active) {
+      await supabase.auth.signOut();
+
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
 
     const isAdmin = profile?.role === "admin";
 
@@ -79,5 +89,20 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/login", "/signup"],
+  matcher: [
+    "/admin/:path*",
+    "/dashboard/:path*",
+    "/community/:path*",
+    "/feature/:path*",
+    "/how-it-works/:path*",
+    "/mentors/:path*",
+    "/pricing/:path*",
+    "/requests/:path*",
+    "/skills/:path*",
+    "/success-stories/:path*",
+    "/swaps/:path*",
+    "/profile/:path*",
+    "/login",
+    "/signup",
+  ],
 };

@@ -99,6 +99,15 @@ export const login = async ({ email, password }: LoginPayload) => {
     throw new Error(profileError.message);
   }
 
+  // Block deactivated accounts
+  if (!profile.is_Active) {
+    await supabase.auth.signOut();
+
+    throw new Error(
+      "Your account has been deactivated. Please contact an administrator.",
+    );
+  }
+
   return {
     user: loginData.user,
     session: loginData.session,

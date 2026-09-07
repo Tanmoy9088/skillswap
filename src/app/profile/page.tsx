@@ -9,6 +9,7 @@ import AddSkillModal from "@/components/AddSkillModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function ProfilePage() {
   const { data: profile, isLoading: profileLoading } = useCurrentProfile();
@@ -22,11 +23,7 @@ export default function ProfilePage() {
   const openEditProfile = useGlobalStore((state) => state.openEditProfile);
 
   if (profileLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        Loading profile...
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   const offeredSkills =

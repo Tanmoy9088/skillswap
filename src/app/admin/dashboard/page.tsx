@@ -1,5 +1,5 @@
 "use client";
-
+import { useAdminPlatformStats } from "@/hooks/admin/useAdminPlatformStats";
 import {
   Activity,
   BarChart3,
@@ -62,15 +62,18 @@ const trendingSkills = [
 ];
 
 const Dashboard = () => {
+  const {
+    data: platformStats,
+    isLoading: isStatsLoading,
+    isError: isStatsError,
+  } = useAdminPlatformStats();
   return (
     <div className="min-h-screen bg-[#FAF8FF] p-8">
       {/* ================= HEADER ================= */}
 
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#253858]">
-            Platform Pulse
-          </h1>
+          <h1 className="text-3xl font-bold text-[#253858]">Platform Pulse</h1>
 
           <p className="mt-1 text-gray-500">
             Real-time overview of SkillSwap+ ecosystem performance.
@@ -109,9 +112,7 @@ const Dashboard = () => {
               Stickiness
             </p>
 
-            <h2 className="mt-2 text-3xl font-bold text-[#253858]">
-              42.8%
-            </h2>
+            <h2 className="mt-2 text-3xl font-bold text-[#253858]">42.8%</h2>
 
             <div className="mt-5 h-1 w-full rounded bg-gray-200">
               <div className="h-full w-[43%] rounded bg-[#4F46E5]" />
@@ -136,7 +137,11 @@ const Dashboard = () => {
             </p>
 
             <h2 className="mt-2 text-3xl font-bold text-[#253858]">
-              12,842
+              {isStatsLoading
+                ? "..."
+                : isStatsError
+                  ? "—"
+                  : platformStats?.total_sessions.toLocaleString()}
             </h2>
 
             <div className="mt-5 h-20">
@@ -170,11 +175,40 @@ const Dashboard = () => {
             </p>
 
             <h2 className="mt-2 text-3xl font-bold text-[#253858]">
-              1,405
+              {isStatsLoading
+                ? "..."
+                : isStatsError
+                  ? "—"
+                  : platformStats?.active_mentors.toLocaleString()}
             </h2>
 
             <p className="mt-3 text-xs italic text-gray-400">
               Peak hours starting in 2h
+            </p>
+          </div>
+          {/* Total Users */}
+
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-start justify-between">
+              <div className="rounded-xl bg-[#E2DFFF] p-3">
+                <UserPlus size={20} className="text-[#4F46E5]" />
+              </div>
+            </div>
+
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
+              Total Users
+            </p>
+
+            <h2 className="mt-2 text-3xl font-bold text-[#253858]">
+              {isStatsLoading
+                ? "..."
+                : isStatsError
+                  ? "—"
+                  : platformStats?.total_users.toLocaleString()}
+            </h2>
+
+            <p className="mt-3 text-xs italic text-gray-400">
+              Registered learners and mentors
             </p>
           </div>
         </div>
@@ -214,16 +248,9 @@ const Dashboard = () => {
                 <LineChart data={userGrowthData}>
                   <CartesianGrid stroke="#EEEEEE" vertical={false} />
 
-                  <XAxis
-                    dataKey="week"
-                    axisLine={false}
-                    tickLine={false}
-                  />
+                  <XAxis dataKey="week" axisLine={false} tickLine={false} />
 
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                  />
+                  <YAxis axisLine={false} tickLine={false} />
 
                   <Tooltip />
 
@@ -287,9 +314,7 @@ const Dashboard = () => {
                       {skill.icon}
                     </div>
 
-                    <span className="text-sm font-medium">
-                      {skill.name}
-                    </span>
+                    <span className="text-sm font-medium">{skill.name}</span>
                   </div>
 
                   <div className="rounded-lg bg-[#F5F6FA] px-2 py-1 text-sm font-semibold">
@@ -320,9 +345,7 @@ const Dashboard = () => {
                     Advanced React Architecture
                   </p>
 
-                  <p className="mt-1 text-xs text-[#4F46E5]">
-                    5 mins ago
-                  </p>
+                  <p className="mt-1 text-xs text-[#4F46E5]">5 mins ago</p>
                 </div>
               </div>
 
@@ -334,13 +357,9 @@ const Dashboard = () => {
                 <div>
                   <h3 className="font-semibold">New Mentor Onboarded</h3>
 
-                  <p className="text-sm text-gray-500">
-                    Senior DevOps
-                  </p>
+                  <p className="text-sm text-gray-500">Senior DevOps</p>
 
-                  <p className="mt-1 text-xs text-[#4F46E5]">
-                    14 mins ago
-                  </p>
+                  <p className="mt-1 text-xs text-[#4F46E5]">14 mins ago</p>
                 </div>
               </div>
 
@@ -356,9 +375,7 @@ const Dashboard = () => {
                     High latency detected in Asia-Pacific
                   </p>
 
-                  <p className="mt-1 text-xs text-[#4F46E5]">
-                    45 mins ago
-                  </p>
+                  <p className="mt-1 text-xs text-[#4F46E5]">45 mins ago</p>
                 </div>
               </div>
             </div>
@@ -394,9 +411,7 @@ const Dashboard = () => {
             <div>
               <p className="font-semibold">Modern CSS Layouts</p>
 
-              <p className="text-xs text-gray-400">
-                Design Systems Track
-              </p>
+              <p className="text-xs text-gray-400">Design Systems Track</p>
             </div>
 
             <p>Elena R.</p>
@@ -414,9 +429,7 @@ const Dashboard = () => {
             <div>
               <p className="font-semibold">Zero to Kubernetes</p>
 
-              <p className="text-xs text-gray-400">
-                Cloud Infrastructure
-              </p>
+              <p className="text-xs text-gray-400">Cloud Infrastructure</p>
             </div>
 
             <p>David K.</p>
@@ -449,7 +462,6 @@ const Dashboard = () => {
 
           <button className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 font-semibold text-[#4F46E5]">
             <Zap size={16} />
-
             Promote Skill
           </button>
         </div>
