@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { MagicCard } from "@/components/ui/magic-card";
 import { useLogin } from "@/hooks/use-login";
@@ -32,7 +33,7 @@ const LoginPage = () => {
         console.log("Success login response:", response);
 
         const userId = response?.user?.id;
-        console.log("UserID:",userId)
+        console.log("UserID:", userId);
 
         if (!userId) return;
 
@@ -45,6 +46,7 @@ const LoginPage = () => {
         } else {
           router.push("/");
         }
+        reset();
       },
 
       onError: (error) => {

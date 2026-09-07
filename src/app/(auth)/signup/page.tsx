@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import { MagicCard } from "@/components/ui/magic-card";
 import { useSignUp } from "@/hooks/use-signUp";
@@ -19,13 +20,11 @@ const SignupPage = () => {
   } = useForm<SignupPayload>({
     resolver: yupResolver(SignupSchema),
     defaultValues: {
-      email: "",
       name: "",
+      email: "",
       phone: "",
-      // role: "user",
       password: "",
       confirmPassword: "",
-      profileImg: "",
     },
   });
 
@@ -36,6 +35,7 @@ const SignupPage = () => {
       onSuccess: async (res) => {
         console.log(res);
         await router.push("/login");
+        reset();
       },
     });
   };
