@@ -74,9 +74,11 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
       <div className="mt-6 flex items-center gap-3">
         {otherUserImage ? (
           <Image
-            src={otherUserImage}
+            src={otherUserImage || "/image.png"}
             alt={otherUserName}
             className="h-12 w-12 rounded-full object-cover"
+            width={40}
+            height={40}
           />
         ) : (
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
