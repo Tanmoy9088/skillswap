@@ -52,6 +52,19 @@ export const signUp = async ({
     throw new Error(profileError.message);
   }
 
+  const { error: transactionError } = await supabase
+    .from("token_transactions")
+    .insert({
+      user_auth_user_id: signUpData.user.id,
+      amount: 100,
+      transaction_type: "initial_balance",
+      description: "Initial token balance",
+    });
+
+  if (transactionError) {
+    throw new Error(transactionError.message);
+  }
+
   return {
     user: signUpData.user,
     profile: profileData,

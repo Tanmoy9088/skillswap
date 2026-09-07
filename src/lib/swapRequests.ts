@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 
-import type { SwapRequest } from "@/types/types/swaps";
-
+import type { Swap, SwapRequest } from "@/types/types/swaps";
 interface CreateSwapRequestParams {
   mentorAuthUserId: string;
   skillId: string;
@@ -81,7 +80,7 @@ export const acceptSwapRequest = async (requestId: string) => {
   return data;
 };
 
-export const getMySwaps = async () => {
+export const getMySwaps = async (): Promise<Swap[]> => {
   const supabase = createClient();
 
   const { data, error } = await supabase.rpc("get_my_swaps");
@@ -111,17 +110,12 @@ export const scheduleSwapSession = async (
   return data;
 };
 
-export const startSwapSession = async (
-  swapId: string
-) => {
+export const startSwapSession = async (swapId: string) => {
   const supabase = createClient();
 
-  const { data, error } = await supabase.rpc(
-    "start_swap_session",
-    {
-      p_swap_id: swapId,
-    }
-  );
+  const { data, error } = await supabase.rpc("start_swap_session", {
+    p_swap_id: swapId,
+  });
 
   if (error) {
     throw new Error(error.message);
@@ -129,17 +123,13 @@ export const startSwapSession = async (
 
   return data;
 };
-
 
 export const completeSwapSession = async (swapId: string) => {
   const supabase = createClient();
 
-  const { data, error } = await supabase.rpc(
-    "complete_swap_session",
-    {
-      p_swap_id: swapId,
-    }
-  );
+  const { data, error } = await supabase.rpc("complete_swap_session", {
+    p_swap_id: swapId,
+  });
 
   if (error) {
     throw new Error(error.message);
@@ -148,22 +138,18 @@ export const completeSwapSession = async (swapId: string) => {
   return data;
 };
 
-
 export const createSwapRating = async (
   swapId: string,
   rating: number,
-  review?: string
+  review?: string,
 ) => {
   const supabase = createClient();
 
-  const { data, error } = await supabase.rpc(
-    "create_swap_rating",
-    {
-      p_swap_id: swapId,
-      p_rating: rating,
-      p_review: review ?? null,
-    }
-  );
+  const { data, error } = await supabase.rpc("create_swap_rating", {
+    p_swap_id: swapId,
+    p_rating: rating,
+    p_review: review ?? null,
+  });
 
   if (error) {
     throw new Error(error.message);

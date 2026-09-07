@@ -71,7 +71,6 @@ export const updateProfile = async (payload: UpdateProfilePayload) => {
 };
 
 export const getUserSkills = async () => {
-  const supabase = createClient();
 
   const {
     data: { user },
@@ -112,7 +111,6 @@ export const addSkill = async ({
   skill_type: "offered" | "wanted";
   proficiency_level?: string;
 }) => {
-  const supabase = createClient();
 
   const {
     data: { user },
@@ -151,7 +149,6 @@ export const addSkill = async ({
 };
 
 export const removeSkill = async (skillId: string) => {
-  const supabase = createClient();
 
   const { error } = await supabase
     .from("user_skills")

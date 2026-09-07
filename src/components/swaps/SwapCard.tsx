@@ -3,12 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, Coins, Star, UserRound } from "lucide-react";
+import { Calendar, Coins, Loader2, Star, UserRound, XCircle } from "lucide-react";
 
 import ScheduleSessionModal from "@/components/swaps/ScheduleSessionModal";
+import RateMentorModal from "@/components/swaps/RateMentorModal";
+
 import { useStartSwapSession } from "@/hooks/skills/useStartSwapSession";
 import { useCompleteSwapSession } from "@/hooks/skills/useCompleteSwapSession";
-import RateMentorModal from "@/components/swaps/RateMentorModal";
+import { useCancelSwapSession } from "@/hooks/skills/useCancelSwapSession";
 
 import type { Swap } from "@/types/types/swaps";
 
@@ -23,6 +25,7 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
 
   const startSession = useStartSwapSession();
   const completeSession = useCompleteSwapSession();
+  const cancelSession = useCancelSwapSession();
 
   const isLearner = swap.learner_auth_user_id === currentUserId;
 
@@ -41,11 +44,29 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
   const handleStartSession = async () => {
     try {
       await startSession.mutateAsync(swap.id);
-
       alert("Session started successfully!");
     } catch (error) {
       alert(
         error instanceof Error ? error.message : "Failed to start session.",
+      );
+    }
+  };
+
+  const handleCancelSession = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this session?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await cancelSession.mutateAsync(swap.id);
+      alert("Session cancelled successfully!");
+    } catch (error) {
+      alert(
+        error instanceof Error ? error.message : "Failed to cancel session.",
       );
     }
   };
@@ -74,7 +95,7 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
       <div className="mt-6 flex items-center gap-3">
         {otherUserImage ? (
           <Image
-            src={otherUserImage || "/image.png"}
+            src={otherUserImage}
             alt={otherUserName}
             className="h-12 w-12 rounded-full object-cover"
             width={40}
@@ -116,7 +137,7 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
         </button>
       )}
 
-      {/* Scheduled → Start */}
+      {/* Scheduled → Start / Cancel */}
       {swap.status === "scheduled" && swap.scheduled_at && (
         <>
           <div className="mt-4 rounded-xl bg-green-50 p-4">
@@ -133,15 +154,33 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
           <button
             type="button"
             onClick={handleStartSession}
-            disabled={startSession.isPending}
+            disabled={startSession.isPending || cancelSession.isPending}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {startSession.isPending ? "Starting..." : "Start Session"}
           </button>
+
+          <button
+            type="button"
+            onClick={handleCancelSession}
+            disabled={startSession.isPending || cancelSession.isPending}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {cancelSession.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Cancelling...
+              </>
+            ) : (
+              <>
+                <XCircle className="h-4 w-4" />
+                Cancel Session
+              </>
+            )}
+          </button>
         </>
       )}
 
-      {/* In Progress */}
       {/* In Progress */}
       {swap.status === "in_progress" && (
         <>
@@ -227,6 +266,7 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
           onClose={() => setIsScheduleOpen(false)}
         />
       )}
+
       {/* Rate Mentor Modal */}
       {isRatingOpen && (
         <RateMentorModal
