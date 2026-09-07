@@ -131,17 +131,23 @@ export default function SkillSwapLanding() {
               <Image
                 className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover"
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"
+                width={20}
+                height={20}
                 alt="User"
               />
               <Image
                 className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover"
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100"
                 alt="User"
+                width={20}
+                height={20}
               />
               <Image
                 className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover"
                 src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100"
                 alt="User"
+                width={20}
+                height={20}
               />
               <div className="h-9 w-9 rounded-full ring-2 ring-white bg-[#4D44E3] text-[11px] font-bold text-white flex items-center justify-center">
                 +50k
