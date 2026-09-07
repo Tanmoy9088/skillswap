@@ -54,15 +54,6 @@ const SwapsPage = () => {
     );
   }
 
-  /*
-   * IMPORTANT:
-   * swaps use auth_user_id.
-   * useCurrentProfile() gives us both:
-   *   user.id
-   *   user.auth_user_id
-   *
-   * We must compare against auth_user_id.
-   */
   const currentAuthUserId: string = user.auth_user_id;
 
   const learning: Swap[] = swaps.filter(
