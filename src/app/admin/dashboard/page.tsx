@@ -3,7 +3,7 @@
 import {
   Activity,
   BarChart3,
-  Bot,
+  // Bot,
   Check,
   Rocket,
   TrendingUp,
@@ -182,7 +182,7 @@ const Dashboard = () => {
         {/* CENTER CHART */}
 
         <div className="col-span-6">
-          <div className="h-full min-h-[735px] rounded-2xl bg-white p-7 shadow-sm">
+          <div className="h-full min-h-183.75 rounded-2xl bg-white p-7 shadow-sm">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-xl font-bold text-[#253858]">
@@ -209,7 +209,7 @@ const Dashboard = () => {
 
             {/* Chart */}
 
-            <div className="h-[450px]">
+            <div className="h-112.5">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={userGrowthData}>
                   <CartesianGrid stroke="#EEEEEE" vertical={false} />
@@ -435,7 +435,7 @@ const Dashboard = () => {
 
         <div className="col-span-4 rounded-2xl bg-[#4F46E5] p-7 text-white shadow-lg">
           <p className="text-xs font-bold uppercase tracking-widest text-indigo-200">
-            Curator's Choice
+            Curator&apos;s Choice
           </p>
 
           <h2 className="mt-3 text-3xl font-bold">

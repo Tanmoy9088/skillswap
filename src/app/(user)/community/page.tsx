@@ -2,12 +2,13 @@ import Image from "next/image";
 import React from "react";
 import community1 from "../../../../public/images/community1.png";
 import community2 from "../../../../public/images/community2.png";
+import StorySection from "@/components/community&stories/StorySection";
 
 const CommunityPage = () => {
   return (
     <>
-      <main className="w-full bg-[#ffffff] px-8">
-        <div className="max-w-7xl mx-auto py-20 grid grid-cols-1 md:grid-cols-12 gap-12">
+      <main className="w-full bg-[#FAF8FF] overflow-hidden ">
+        <div className="max-w-7xl mx-auto py-20 md:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 bg-[#F2F3FF] rounded-[32px]">
           <div className="md:col-span-6 flex flex-col">
             <p className="w-fit px-4 py-1.5 bg-[#d5e3fc] rounded-xl">
               Our community
@@ -58,6 +59,7 @@ const CommunityPage = () => {
             <p>HOURS TAUGHT</p>
           </div>
         </div>
+        <StorySection />
       </main>
     </>
   );

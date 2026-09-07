@@ -6,7 +6,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Header />
-      <main className="mt-20">{children}</main>
+      <main className="mt-20 overflow-hidden">{children}</main>
       <Footer />
     </>
   );

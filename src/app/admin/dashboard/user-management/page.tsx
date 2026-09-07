@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useUsers } from "@/hooks/use-user";
+import { useUserPagination } from "@/store/userManagementStore";
 import {
   AlertTriangle,
   ArrowRight,
@@ -8,19 +10,31 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CircleAlert,
+  // CircleAlert,
   Filter,
   RotateCcw,
-  Search,
+  // Search,
   ShieldCheck,
-  SlidersHorizontal,
+  // SlidersHorizontal,
   Star,
 } from "lucide-react";
+import Image from "next/image";
 
 import React, { useState } from "react";
 
 const UserManagement = () => {
-  const { data: users, isError, isLoading, error } = useUsers();
+  const pageSize = 3;
+
+  const page = useUserPagination((state) => state.page);
+  const setPrev = useUserPagination((state) => state.setPrev);
+  const setNext = useUserPagination((state) => state.setNext);
+  const setPage = useUserPagination((state) => state.setPage);
+  const {
+    data: users,
+    isError,
+    isLoading,
+    error: Error,
+  } = useUsers(page, pageSize);
   console.log("uSERS:", users);
   const [activeTab, setActiveTab] = useState("All Users");
 
@@ -64,7 +78,7 @@ const UserManagement = () => {
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {/* User Type */}
 
-        <button className="flex h-[72px] items-center justify-between rounded-lg bg-white px-5 shadow-sm">
+        <button className="flex h-18 items-center justify-between rounded-lg bg-white px-5 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="rounded-xl bg-[#E2E6F5] p-3 text-[#4F46E5]">
               <Filter size={20} />
@@ -86,7 +100,7 @@ const UserManagement = () => {
 
         {/* Reputation */}
 
-        <button className="flex h-[72px] items-center justify-between rounded-lg bg-white px-5 shadow-sm">
+        <button className="flex h-18 items-center justify-between rounded-lg bg-white px-5 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="rounded-xl bg-[#E2E6F5] p-3 text-[#4F46E5]">
               <Star size={20} />
@@ -108,7 +122,7 @@ const UserManagement = () => {
 
         {/* Status */}
 
-        <button className="flex h-[72px] items-center justify-between rounded-lg bg-white px-5 shadow-sm">
+        <button className="flex h-18 items-center justify-between rounded-lg bg-white px-5 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="rounded-xl bg-[#E9E7FF] p-3 text-[#4F46E5]">
               <BadgeCheck size={20} />
@@ -130,7 +144,7 @@ const UserManagement = () => {
 
         {/* Reset */}
 
-        <button className="flex h-[72px] items-center justify-center gap-3 rounded-lg bg-white px-5 font-semibold text-[#53617A] shadow-sm">
+        <button className="flex h-18 items-center justify-center gap-3 rounded-lg bg-white px-5 font-semibold text-[#53617A] shadow-sm">
           <RotateCcw size={20} />
           Reset Filters
         </button>
@@ -155,7 +169,7 @@ const UserManagement = () => {
 
         {/* Users */}
 
-        {users?.map((user) => (
+        {users?.users?.map((user) => (
           <div
             key={user.id}
             className="grid grid-cols-1 gap-5 border-b px-8 py-5 md:grid-cols-12 md:items-center"
@@ -164,7 +178,13 @@ const UserManagement = () => {
 
             <div className="col-span-4 flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#313846] text-2xl">
-                {user.avatar}
+                <Image
+                  src={user.profile_img || "/default-avatar.png"}
+                  alt={user.name || "User"}
+                  width={30}
+                  height={30}
+                  className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#313846] text-2xl"
+                />
               </div>
 
               <div>
@@ -253,28 +273,41 @@ const UserManagement = () => {
 
         <div className="flex flex-col gap-5 bg-[#F5F6FB] px-8 py-5 md:flex-row md:items-center md:justify-between">
           <p className="text-sm text-[#5C6981]">
-            Showing <span className="font-semibold">1 - 4</span> of 1,280 active
-            curators
+            Showing{" "}
+            <span className="font-semibold">{users?.users.length ?? 0}</span> of{" "}
+            {users?.total ?? 0} active curators
           </p>
 
           <div className="flex items-center gap-2">
-            <button className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-gray-400">
+            <button
+              onClick={setPrev}
+              disabled={page === 1}
+              className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-gray-400"
+            >
               <ChevronLeft size={16} />
             </button>
+            {Array.from(
+              { length: users?.totalPages ?? 0 },
+              (_, index) => index + 1,
+            ).map((pageNumber) => (
+              <button
+                key={pageNumber}
+                onClick={() => setPage(pageNumber)}
+                className={`flex h-9 w-9 items-center justify-center rounded-md ${
+                  page === pageNumber
+                    ? "bg-[#4F46E5] text-white"
+                    : "bg-white text-[#53617A]"
+                }`}
+              >
+                {pageNumber}
+              </button>
+            ))}
 
-            <button className="flex h-9 w-9 items-center justify-center rounded-md bg-[#4F46E5] text-white">
-              1
-            </button>
-
-            <button className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-[#53617A]">
-              2
-            </button>
-
-            <button className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-[#53617A]">
-              ...
-            </button>
-
-            <button className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-gray-400">
+            <button
+              onClick={setNext}
+              disabled={page >= (users?.totalPages ?? 1)}
+              className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-gray-400"
+            >
               <ChevronRight size={16} />
             </button>
           </div>
@@ -286,7 +319,7 @@ const UserManagement = () => {
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Growth */}
 
-        <div className="rounded-2xl bg-gradient-to-br from-[#4F46E5] to-[#3730A3] p-6 text-white shadow-lg">
+        <div className="rounded-2xl bg-linear-to-br from-[#4F46E5] to-[#3730A3] p-6 text-white shadow-lg">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">
             Weekly Growth
           </p>
