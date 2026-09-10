@@ -27,7 +27,6 @@ export const getMyTokenBalance = async (): Promise<number> => {
   return Number(data ?? 0);
 };
 
-// export const getMyTokenTransactions = async (): Promise<TokenTransaction[]> => {
 //   const supabase = createClient();
 
 //   const { data, error } = await supabase
