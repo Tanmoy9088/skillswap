@@ -71,7 +71,6 @@ export const updateProfile = async (payload: UpdateProfilePayload) => {
 };
 
 export const getUserSkills = async () => {
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -106,12 +105,13 @@ export const addSkill = async ({
   skill_name,
   skill_type,
   proficiency_level,
+  image,
 }: {
   skill_name: string;
   skill_type: "offered" | "wanted";
   proficiency_level?: string;
+  image?: File | null;
 }) => {
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -130,6 +130,36 @@ export const addSkill = async ({
     throw new Error("Profile not found");
   }
 
+  let imageUrl: string | null = null;
+  let uploadedFilePath: string | null = null;
+
+  // Upload skill image if one was selected
+  if (image) {
+    const fileExtension = image.name.split(".").pop()?.toLowerCase() || "jpg";
+
+    const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+
+    uploadedFilePath = `${user.id}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("skill-images")
+      .upload(uploadedFilePath, image, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      throw new Error(`Image upload failed: ${uploadError.message}`);
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("skill-images").getPublicUrl(uploadedFilePath);
+
+    imageUrl = publicUrl;
+  }
+
+  // Create the skill
   const { data, error } = await supabase
     .from("user_skills")
     .insert({
@@ -137,11 +167,17 @@ export const addSkill = async ({
       skill_name,
       skill_type,
       proficiency_level,
+      image_url: imageUrl,
     })
     .select()
     .single();
 
   if (error) {
+    // Clean up uploaded image if skill creation fails
+    if (uploadedFilePath) {
+      await supabase.storage.from("skill-images").remove([uploadedFilePath]);
+    }
+
     throw new Error(error.message);
   }
 
@@ -149,7 +185,6 @@ export const addSkill = async ({
 };
 
 export const removeSkill = async (skillId: string) => {
-
   const { error } = await supabase
     .from("user_skills")
     .delete()

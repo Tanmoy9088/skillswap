@@ -43,7 +43,6 @@ export default function SwapRequestModal({
     register,
     handleSubmit,
     reset,
-    setValue,
     formState: { errors },
   } = useForm<SwapRequestForm>({
     defaultValues: {

@@ -179,7 +179,7 @@ const UserManagement = () => {
             <div className="col-span-4 flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#313846] text-2xl">
                 <Image
-                  src={user.profile_img || "/default-avatar.png"}
+                  src={user.profile_img || "/image.png"}
                   alt={user.name || "User"}
                   width={30}
                   height={30}

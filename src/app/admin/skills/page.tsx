@@ -6,17 +6,12 @@ import { useMemo } from "react";
 import { useAdminSkills } from "@/hooks/admin/useAdminSkills";
 import { useDeleteAdminSkill } from "@/hooks/admin/useDeleteAdminSkill";
 import { useSkillDiscovery } from "@/store/skillDiscovery";
-import AdminSessionsSkeleton from "@/components/admin/sessions/AdminSessionsSkeleton";
 
 const AdminSkillsPage = () => {
   const { data: skills, isLoading, isError, error } = useAdminSkills();
-  //   const [search, setSearch] = useState("");
-
   const search = useSkillDiscovery((state) => state.search);
   const setSearch = useSkillDiscovery((state) => state.setSearch);
-
   const deleteSkill = useDeleteAdminSkill();
-
   const filteredSkills = useMemo(() => {
     if (!skills) return [];
 
@@ -34,8 +29,24 @@ const AdminSkillsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8">
-        <AdminSessionsSkeleton />
+      <div className="p-6 sm:p-8">
+        <div className="mx-auto max-w-7xl space-y-6">
+          <div className="h-9 w-48 animate-pulse rounded-lg bg-gray-200" />
+          <div className="h-5 w-80 animate-pulse rounded bg-gray-200" />
+
+          <div className="rounded-2xl border bg-white p-6">
+            <div className="mb-6 h-11 w-full animate-pulse rounded-xl bg-gray-100" />
+
+            <div className="space-y-4">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-16 animate-pulse rounded-xl bg-gray-100"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -212,21 +223,14 @@ const AdminSkillsPage = () => {
 
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          {skill.mentor_profile_img ? (
-                            <Image
-                              src={skill.mentor_profile_img}
-                              alt={skill.mentor_name || "Mentor"}
-                              width={36}
-                              height={36}
-                              className="h-9 w-9 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-600">
-                              {skill.mentor_name?.charAt(0).toUpperCase() ||
-                                "U"}
-                            </div>
-                          )}
-
+                          <Image
+                            src={skill.mentor_profile_img || "/image.png"}
+                            alt={skill.mentor_name || "Mentor"}
+                            width={36}
+                            height={36}
+                            className="h-9 w-9 rounded-full object-cover"
+                          />
+                          ,
                           <span className="font-medium text-gray-800">
                             {skill.mentor_name || "Unknown user"}
                           </span>

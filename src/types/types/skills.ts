@@ -19,6 +19,8 @@ export interface SkillDiscoveryItem {
 
   average_rating: number;
   total_ratings: number;
+
+  image_url: string | null;
 }
 
 export interface SkillDiscoveryResponse {

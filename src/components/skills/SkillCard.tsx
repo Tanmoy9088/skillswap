@@ -8,20 +8,26 @@ interface SkillCardProps {
   skill: SkillDiscoveryItem;
 }
 
-export default function SkillCard({
-  skill,
-}: SkillCardProps) {
-  const skillSlug = encodeURIComponent(
-    skill.skill_name
-  );
+export default function SkillCard({ skill }: SkillCardProps) {
+  const skillSlug = encodeURIComponent(skill.skill_name);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
       <Link href={`/skills/${skillSlug}`}>
         <div className="relative h-48 overflow-hidden bg-indigo-50">
-          <div className="flex h-full items-center justify-center text-5xl font-bold text-indigo-200">
-            {skill.skill_name.charAt(0)}
-          </div>
+          {skill.image_url ? (
+            <Image
+              src={skill.image_url}
+              alt={skill.skill_name}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition duration-300 hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-5xl font-bold text-indigo-200">
+              {skill.skill_name.charAt(0).toUpperCase()}
+            </div>
+          )}
 
           <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#17366F] shadow-sm">
             {skill.category}
@@ -49,10 +55,7 @@ export default function SkillCard({
             className="flex min-w-0 items-center gap-2"
           >
             <Image
-              src={
-                skill.mentor_profile_img ||
-                "/default-avatar.png"
-              }
+              src={skill.mentor_profile_img || "/image.png"}
               alt={skill.mentor_name}
               width={32}
               height={32}
@@ -72,10 +75,7 @@ export default function SkillCard({
 
           {/* Rating */}
           <div className="flex shrink-0 items-center gap-1">
-            <Star
-              size={15}
-              className="fill-yellow-400 text-yellow-400"
-            />
+            <Star size={15} className="fill-yellow-400 text-yellow-400" />
 
             <span className="text-sm font-semibold text-yellow-600">
               {skill.average_rating > 0
@@ -94,16 +94,12 @@ export default function SkillCard({
         <div className="mt-5 flex items-center justify-between">
           <p className="font-bold text-indigo-600">
             {skill.token_rate} Token
-
-            <span className="font-normal text-gray-500">
-              {" "}
-              / hr
-            </span>
+            <span className="font-normal text-gray-500"> / hr</span>
           </p>
 
           <Link
             href={`/skills/${skillSlug}`}
-            className="rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600"
+            className="rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100"
           >
             Swap
           </Link>

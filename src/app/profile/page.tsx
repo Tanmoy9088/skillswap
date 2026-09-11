@@ -1,26 +1,45 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  Pencil,
+  Plus,
+  Sparkles,
+  Trash2,
+  UserRound,
+  X,
+} from "lucide-react";
+
 import { useCurrentProfile } from "@/hooks/use-current-profile";
 import { useUserSkills } from "@/hooks/skills/useUserSkills";
 import { useRemoveSkill } from "@/hooks/skills/useRemoveSkills";
-import { Plus, Pencil, X, CircleArrowLeft } from "lucide-react";
 import { useGlobalStore } from "@/store/globalState";
+
 import AddSkillModal from "@/components/AddSkillModal";
 import EditProfileModal from "@/components/EditProfileModal";
-import Image from "next/image";
-import Link from "next/link";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
 
 export default function ProfilePage() {
-  const { data: profile, isLoading: profileLoading } = useCurrentProfile();
+  const { data: profile, isLoading: profileLoading } =
+    useCurrentProfile();
 
-  const { data: skills, isLoading: skillsLoading } = useUserSkills();
+  const { data: skills, isLoading: skillsLoading } =
+    useUserSkills();
 
-  const { mutate: removeSkill, isPending: isRemoving } = useRemoveSkill();
+  const { mutate: removeSkill, isPending: isRemoving } =
+    useRemoveSkill();
 
-  const openAddSkill = useGlobalStore((state) => state.openAddSkill);
+  const openAddSkill = useGlobalStore(
+    (state) => state.openAddSkill,
+  );
 
-  const openEditProfile = useGlobalStore((state) => state.openEditProfile);
+  const openEditProfile = useGlobalStore(
+    (state) => state.openEditProfile,
+  );
 
   if (profileLoading) {
     return <LoadingSkeleton />;
@@ -32,159 +51,457 @@ export default function ProfilePage() {
   const wantedSkills =
     skills?.filter((skill) => skill.skill_type === "wanted") || [];
 
+  const totalSkills = skills?.length || 0;
+
   return (
-    <div className="mx-auto min-h-screen max-w-5xl p-8 overflow-hidden">
-      <Link href={"/"}>
-        <CircleArrowLeft />
-      </Link>
-      {/* PROFILE HEADER */}
-      <div className="rounded-2xl border bg-white p-8 shadow-sm mt-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-6">
-            {/* Avatar */}
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-indigo-200 text-3xl font-bold text-indigo-700">
-              {/* {profile?.name?.charAt(0)?.toUpperCase()} */}
-              <Image
-                src={profile?.profile_img || "/image.png"}
-                alt="img"
-                width={50}
-                height={40}
-                className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-indigo-200 text-3xl font-bold text-indigo-700"
-              />
+    <main className="min-h-screen overflow-hidden bg-[#F7F8FC]">
+      {/* Decorative background */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-indigo-200/30 blur-3xl" />
+        <div className="absolute right-0 top-40 h-96 w-96 rounded-full bg-purple-200/20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-200/20 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto max-w-6xl px-5 py-8 sm:px-8">
+        {/* Back */}
+        <Link
+          href="/"
+          className="mb-6 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-600 shadow-sm ring-1 ring-gray-100 transition hover:-translate-x-1 hover:text-indigo-600"
+        >
+          <ArrowLeft size={17} />
+          Back
+        </Link>
+
+        {/* Profile Hero */}
+        <section className="relative overflow-hidden rounded-3xl border border-indigo-100 bg-white shadow-sm">
+          {/* Banner */}
+          <div className="h-32 bg-linear-to-r from-indigo-600 via-violet-600 to-purple-600 sm:h-40">
+            <div className="absolute right-8 top-6 opacity-20">
+              <Sparkles className="h-20 w-20 text-white" />
+            </div>
+          </div>
+
+          <div className="px-6 pb-7 sm:px-8">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+              {/* Profile information */}
+              <div className="-mt-14 flex flex-col gap-4 sm:flex-row sm:items-end">
+                {/* Avatar */}
+                <div className="relative">
+                  <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-indigo-100 shadow-lg">
+                    <Image
+                      src={profile?.profile_img || "/image.png"}
+                      alt={profile?.name || "Profile"}
+                      width={112}
+                      height={112}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <div className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-green-500">
+                    <CheckCircle2
+                      size={15}
+                      className="text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="pb-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+                      {profile?.name}
+                    </h1>
+
+                    <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+                      SkillSwap Member
+                    </span>
+                  </div>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    {profile?.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Edit */}
+              <button
+                type="button"
+                onClick={openEditProfile}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+              >
+                <Pencil size={16} />
+                Edit Profile
+              </button>
             </div>
 
-            {/* User information */}
-            <div>
-              <h1 className="text-3xl font-bold">{profile?.name}</h1>
+            {/* Bio */}
+            <div className="mt-7 max-w-3xl">
+              <div className="flex items-center gap-2">
+                <UserRound size={16} className="text-indigo-500" />
 
-              <p className="mt-1 text-gray-500">{profile?.email}</p>
+                <p className="text-sm font-semibold text-gray-700">
+                  About me
+                </p>
+              </div>
 
-              <p className="mt-3 max-w-xl text-gray-600">
-                {profile?.bio || "No bio added yet"}
+              <p className="mt-2 text-sm leading-6 text-gray-500">
+                {profile?.bio ||
+                  "No bio added yet. Tell the SkillSwap community a little about yourself."}
               </p>
             </div>
           </div>
+        </section>
 
-          {/* Edit button */}
-          <button
-            onClick={openEditProfile}
-            className="flex items-center gap-2 rounded-lg border px-4 py-2 hover:bg-gray-50"
-          >
-            <Pencil size={16} />
-            Edit Profile
-          </button>
-        </div>
-      </div>
+        {/* Stats */}
+        <section className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50">
+              <BookOpen className="h-5 w-5 text-indigo-600" />
+            </div>
 
-      {/* SKILLS OFFERED */}
-      <section className="mt-8 rounded-2xl border bg-white p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold">Skills I Offer</h2>
+            <p className="mt-4 text-2xl font-bold text-gray-900">
+              {totalSkills}
+            </p>
 
             <p className="text-sm text-gray-500">
-              Skills you can teach other users
+              Total Skills
             </p>
           </div>
 
-          <button
-            onClick={() => openAddSkill("offered")}
-            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-          >
-            <Plus size={18} />
-            Add Skill
-          </button>
-        </div>
+          <div className="rounded-2xl border border-green-100 bg-white p-5 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+              <Sparkles className="h-5 w-5 text-green-600" />
+            </div>
 
-        {skillsLoading ? (
-          <p>Loading skills...</p>
-        ) : offeredSkills.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-6 text-center text-gray-500">
-            No skills offered yet.
+            <p className="mt-4 text-2xl font-bold text-gray-900">
+              {offeredSkills.length}
+            </p>
+
+            <p className="text-sm text-gray-500">
+              Skills Offered
+            </p>
           </div>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {offeredSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className="flex items-center gap-3 rounded-xl bg-indigo-100 px-4 py-3"
-              >
-                <div>
-                  <p className="font-semibold">{skill.skill_name}</p>
 
-                  <p className="text-xs text-indigo-600">
-                    {skill.proficiency_level}
-                  </p>
+          <div className="col-span-2 rounded-2xl border border-purple-100 bg-white p-5 shadow-sm sm:col-span-1">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50">
+              <BookOpen className="h-5 w-5 text-purple-600" />
+            </div>
+
+            <p className="mt-4 text-2xl font-bold text-gray-900">
+              {wantedSkills.length}
+            </p>
+
+            <p className="text-sm text-gray-500">
+              Skills Wanted
+            </p>
+          </div>
+        </section>
+
+        {/* Skills I Offer */}
+        <section className="mt-8">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100">
+                  <Sparkles className="h-4 w-4 text-indigo-600" />
                 </div>
 
-                <button
-                  disabled={isRemoving}
-                  onClick={() => removeSkill(skill.id)}
-                  className="rounded-md p-1 text-red-500 hover:bg-red-100 disabled:opacity-50"
-                >
-                  <X size={16} />
-                </button>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Skills I Offer
+                </h2>
               </div>
-            ))}
+
+              <p className="mt-2 text-sm text-gray-500">
+                Skills you can teach to other members.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openAddSkill("offered")}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 hover:shadow-md"
+            >
+              <Plus size={18} />
+              Add Skill
+            </button>
           </div>
-        )}
-      </section>
 
-      {/* SKILLS WANTED */}
-      <section className="mt-8 rounded-2xl border bg-white p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold">Skills I Want</h2>
+          {skillsLoading ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className="h-72 animate-pulse rounded-2xl bg-gray-200"
+                />
+              ))}
+            </div>
+          ) : offeredSkills.length === 0 ? (
+            <EmptySkills
+              type="offered"
+              onAdd={() => openAddSkill("offered")}
+            />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {offeredSkills.map((skill) => (
+                <SkillProfileCard
+                  key={skill.id}
+                  skill={skill}
+                  type="offered"
+                  isRemoving={isRemoving}
+                  onRemove={() => removeSkill(skill.id)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
 
-            <p className="text-sm text-gray-500">Skills you want to learn</p>
-          </div>
-
-          <button
-            onClick={() => openAddSkill("wanted")}
-            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-          >
-            <Plus size={18} />
-            Add Skill
-          </button>
-        </div>
-
-        {skillsLoading ? (
-          <p>Loading skills...</p>
-        ) : wantedSkills.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-6 text-center text-gray-500">
-            No skills wanted yet.
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {wantedSkills.map((skill) => (
-              <div
-                key={skill.id}
-                className="flex items-center gap-3 rounded-xl bg-green-100 px-4 py-3"
-              >
-                <div>
-                  <p className="font-semibold">{skill.skill_name}</p>
-
-                  {skill.proficiency_level && (
-                    <p className="text-xs text-green-700">
-                      {skill.proficiency_level}
-                    </p>
-                  )}
+        {/* Skills I Want */}
+        <section className="mt-10">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100">
+                  <BookOpen className="h-4 w-4 text-green-600" />
                 </div>
 
-                <button
-                  disabled={isRemoving}
-                  onClick={() => removeSkill(skill.id)}
-                  className="rounded-md p-1 text-red-500 hover:bg-red-100 disabled:opacity-50"
-                >
-                  <X size={16} />
-                </button>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Skills I Want
+                </h2>
               </div>
-            ))}
+
+              <p className="mt-2 text-sm text-gray-500">
+                Skills you want to learn from other members.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => openAddSkill("wanted")}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 hover:shadow-md"
+            >
+              <Plus size={18} />
+              Add Skill
+            </button>
           </div>
-        )}
-      </section>
+
+          {skillsLoading ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className="h-72 animate-pulse rounded-2xl bg-gray-200"
+                />
+              ))}
+            </div>
+          ) : wantedSkills.length === 0 ? (
+            <EmptySkills
+              type="wanted"
+              onAdd={() => openAddSkill("wanted")}
+            />
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {wantedSkills.map((skill) => (
+                <SkillProfileCard
+                  key={skill.id}
+                  skill={skill}
+                  type="wanted"
+                  isRemoving={isRemoving}
+                  onRemove={() => removeSkill(skill.id)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+
       <AddSkillModal />
       <EditProfileModal />
+    </main>
+  );
+}
+
+function SkillProfileCard({
+  skill,
+  type,
+  isRemoving,
+  onRemove,
+}: {
+  skill: {
+    id: string;
+    skill_name: string;
+    proficiency_level?: string | null;
+    image_url?: string | null;
+    category?: string | null;
+    description?: string | null;
+    token_rate?: number | null;
+  };
+  type: "offered" | "wanted";
+  isRemoving: boolean;
+  onRemove: () => void;
+}) {
+  const isOffered = type === "offered";
+
+  return (
+    <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+      {/* Image */}
+      <div className="relative h-44 overflow-hidden bg-indigo-50">
+        {skill.image_url ? (
+          <Image
+            src={skill.image_url}
+            alt={skill.skill_name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div
+            className={`flex h-full items-center justify-center ${
+              isOffered
+                ? "bg-indigo-50"
+                : "bg-green-50"
+            }`}
+          >
+            <span
+              className={`text-6xl font-bold ${
+                isOffered
+                  ? "text-indigo-200"
+                  : "text-green-200"
+              }`}
+            >
+              {skill.skill_name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+        )}
+
+        {/* Type badge */}
+        <span
+          className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold shadow-sm ${
+            isOffered
+              ? "bg-white text-indigo-600"
+              : "bg-white text-green-600"
+          }`}
+        >
+          {isOffered ? "I Offer" : "I Want"}
+        </span>
+
+        {/* Remove */}
+        <button
+          type="button"
+          disabled={isRemoving}
+          onClick={onRemove}
+          aria-label={`Remove ${skill.skill_name}`}
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="p-5">
+        <h3 className="text-lg font-bold text-gray-900">
+          {skill.skill_name}
+        </h3>
+
+        {skill.category && (
+          <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-400">
+            {skill.category}
+          </p>
+        )}
+
+        {skill.proficiency_level && (
+          <div className="mt-3">
+            <span
+              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                isOffered
+                  ? "bg-indigo-50 text-indigo-600"
+                  : "bg-green-50 text-green-600"
+              }`}
+            >
+              {skill.proficiency_level}
+            </span>
+          </div>
+        )}
+
+        {skill.description && (
+          <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-500">
+            {skill.description}
+          </p>
+        )}
+
+        {isOffered &&
+          skill.token_rate !== null &&
+          skill.token_rate !== undefined && (
+            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
+              <span className="text-xs text-gray-400">
+                Session rate
+              </span>
+
+              <span className="font-bold text-indigo-600">
+                {skill.token_rate} Token
+                <span className="font-normal text-gray-400">
+                  {" "}
+                  / hr
+                </span>
+              </span>
+            </div>
+          )}
+      </div>
+    </article>
+  );
+}
+
+function EmptySkills({
+  type,
+  onAdd,
+}: {
+  type: "offered" | "wanted";
+  onAdd: () => void;
+}) {
+  const isOffered = type === "offered";
+
+  return (
+    <div
+      className={`rounded-2xl border-2 border-dashed p-10 text-center ${
+        isOffered
+          ? "border-indigo-100 bg-indigo-50/40"
+          : "border-green-100 bg-green-50/40"
+      }`}
+    >
+      <div
+        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${
+          isOffered ? "bg-indigo-100" : "bg-green-100"
+        }`}
+      >
+        {isOffered ? (
+          <Sparkles className="h-6 w-6 text-indigo-600" />
+        ) : (
+          <BookOpen className="h-6 w-6 text-green-600" />
+        )}
+      </div>
+
+      <h3 className="mt-4 font-semibold text-gray-900">
+        {isOffered
+          ? "Share your expertise"
+          : "Start your learning journey"}
+      </h3>
+
+      <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
+        {isOffered
+          ? "Add a skill you're confident teaching to help other members."
+          : "Add a skill you'd like to learn from someone in the community."}
+      </p>
+
+      <button
+        type="button"
+        onClick={onAdd}
+        className={`mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white ${
+          isOffered
+            ? "bg-indigo-600 hover:bg-indigo-700"
+            : "bg-green-600 hover:bg-green-700"
+        }`}
+      >
+        <Plus size={17} />
+        Add Skill
+      </button>
     </div>
   );
 }

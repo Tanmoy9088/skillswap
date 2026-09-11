@@ -63,3 +63,91 @@ export const toggleAdminUserStatus = async (
 
   return data;
 };
+
+export interface AdminSkill {
+  id: string;
+  user_id: string;
+  skill_name: string | null;
+  skill_type: "offered" | "wanted" | null;
+  proficiency_level: string | null;
+  category: string | null;
+  description: string | null;
+  token_rate: number | null;
+  created_at: string;
+  mentor_name: string | null;
+  mentor_profile_img: string | null;
+}
+
+export const getAdminSkills = async (): Promise<AdminSkill[]> => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc("get_admin_skills");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as AdminSkill[];
+};
+
+export const deleteAdminSkill = async (skillId: string) => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc("delete_admin_skill", {
+    p_skill_id: skillId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+export interface AdminSession {
+  id: string;
+  request_id: string | null;
+  skill_id: string | null;
+  learner_auth_user_id: string;
+  mentor_auth_user_id: string;
+  status: "accepted" | "scheduled" | "in_progress" | "completed" | "cancelled";
+  scheduled_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+  updated_at: string;
+  skill_name: string | null;
+  category: string | null;
+  token_rate: number | null;
+  learner_name: string | null;
+  learner_profile_img: string | null;
+  mentor_name: string | null;
+  mentor_profile_img: string | null;
+}
+
+export const getAdminSessions = async (): Promise<AdminSession[]> => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc("get_admin_sessions");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []) as AdminSession[];
+};
+
+export const cancelAdminSession = async (sessionId: string) => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc("cancel_admin_session", {
+    p_swap_id: sessionId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};

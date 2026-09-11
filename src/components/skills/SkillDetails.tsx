@@ -1,26 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Coins,
-  Users,
-} from "lucide-react";
+import { ArrowLeft, Coins, Users } from "lucide-react";
 import type {
   SkillDetails as SkillDetailsType,
-  SkillMentor,
+  SkillDiscoveryItem,
 } from "@/types/types/skills";
-import MentorCard from "./MentorCard";
+import MentorCard from "../mentors/MentorCard";
 
 interface SkillDetailsProps {
   skill: SkillDetailsType;
-  mentors: SkillMentor[];
+  mentors: SkillDiscoveryItem[];
 }
 
-export default function SkillDetails({
-  skill,
-  mentors,
-}: SkillDetailsProps) {
+export default function SkillDetails({ skill, mentors }: SkillDetailsProps) {
   return (
     <main className="min-h-screen bg-[#F7F7FF]">
       <section className="border-b border-gray-100 bg-white">
@@ -49,15 +42,10 @@ export default function SkillDetails({
 
             <div className="mt-7 flex flex-wrap gap-4">
               <div className="flex items-center gap-3 rounded-xl bg-[#F7F7FF] px-5 py-3">
-                <Coins
-                  size={20}
-                  className="text-indigo-600"
-                />
+                <Coins size={20} className="text-indigo-600" />
 
                 <div>
-                  <p className="text-xs text-gray-400">
-                    Starting rate
-                  </p>
+                  <p className="text-xs text-gray-400">Starting rate</p>
 
                   <p className="font-bold text-[#17366F]">
                     {skill.token_rate} tokens
@@ -66,19 +54,12 @@ export default function SkillDetails({
               </div>
 
               <div className="flex items-center gap-3 rounded-xl bg-[#F7F7FF] px-5 py-3">
-                <Users
-                  size={20}
-                  className="text-indigo-600"
-                />
+                <Users size={20} className="text-indigo-600" />
 
                 <div>
-                  <p className="text-xs text-gray-400">
-                    Available mentors
-                  </p>
+                  <p className="text-xs text-gray-400">Available mentors</p>
 
-                  <p className="font-bold text-[#17366F]">
-                    {mentors.length}
-                  </p>
+                  <p className="font-bold text-[#17366F]">{mentors.length}</p>
                 </div>
               </div>
             </div>
@@ -110,10 +91,7 @@ export default function SkillDetails({
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {mentors.map((mentor) => (
-              <MentorCard
-                key={mentor.id}
-                mentor={mentor}
-              />
+              <MentorCard key={mentor.id} mentor={mentor} />
             ))}
           </div>
         )}

@@ -19,7 +19,7 @@ const HowItWorks = () => {
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-[#445D99] ">
-              SkillSwap+ operates on a circular credit-based system. We've
+              SkillSwap+ operates on a circular credit-based system. We&apos;ve
               removed the barrier of money, replacing it with the value of your
               unique expertise.
             </p>
@@ -60,7 +60,7 @@ const HowItWorks = () => {
             </div>
 
             {/* Image */}
-            <div className="min-h-[400px] rounded-3xl bg-slate-800 lg:col-span-5 rounded-2xl">
+            <div className="min-h-100 rounded-3xl bg-slate-800 lg:col-span-5">
               <Image src={CreativeImg} alt="Creative image" className="rounded-2xl"/>
             </div>
 
@@ -69,7 +69,7 @@ const HowItWorks = () => {
               <h2 className="text-2xl font-bold">Spend Credits</h2>
 
               <p className="mt-4 text-slate-500">
-                Access the world's most diverse curriculum. No tuition, just
+                Access the world&apos;s most diverse curriculum. No tuition, just
                 trade.
               </p>
 
@@ -133,7 +133,7 @@ const HowItWorks = () => {
           </div>
 
           {/* CTA */}
-          <div className="mt-20 rounded-[2rem] bg-gradient-to-br from-[#4f46e5] to-[#3328a8] px-8 py-20 text-center">
+          <div className="mt-20 rounded-[2rem] bg-linear-to-br from-[#4f46e5] to-[#3328a8] px-8 py-20 text-center">
             <h2 className="mx-auto max-w-2xl text-4xl font-bold text-[#FAF6FF] ">
               Ready to join the intellectual renaissance?
             </h2>

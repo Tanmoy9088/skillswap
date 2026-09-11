@@ -54,7 +54,7 @@ const AdminUsersPage = () => {
         {/* Data */}
         {!isLoading && !isError && users && users.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
+            <table className="w-full min-w-175">
               <thead>
                 <tr className="border-b text-left text-xs font-bold uppercase tracking-wider text-gray-400">
                   <th className="px-6 py-4">User</th>

@@ -55,7 +55,7 @@ const LoginPage = () => {
       <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl items-center justify-center">
         <div className="grid w-full overflow-hidden rounded-3xl bg-white/10 shadow-2xl backdrop-blur-xl lg:grid-cols-2">
           {/* LEFT SIDE */}
-          <div className="relative hidden min-h-[620px] overflow-hidden p-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <div className="relative hidden min-h-155 overflow-hidden p-10 text-white lg:flex lg:flex-col lg:justify-between">
             {/* Decorative circles */}
             <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10" />
             <div className="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/10" />
@@ -212,7 +212,7 @@ const LoginPage = () => {
 
               {/* SIGNUP */}
               <p className="mt-7 text-center text-sm text-gray-500">
-                Don't have an account?{" "}
+                Don;t have an account?{" "}
                 <Link
                   href="/signup"
                   className="font-semibold text-indigo-600 transition hover:text-indigo-700"

@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar, Coins, History, Loader2 } from "lucide-react";
-
+import DashboardSessionCalendar from "@/components/dashboard/DashboardSessionCalendar";
 import { useMySwaps } from "@/hooks/skills/useMySwap";
 import { useTokenBalance } from "@/hooks/wallet/useTokenBalance";
 import { useCurrentProfile } from "@/hooks/use-current-profile";
@@ -171,6 +171,11 @@ const Dashboard = () => {
             </div>
           )}
         </section>
+        {/* Session Calendar */}
+        <DashboardSessionCalendar
+          swaps={swaps}
+          currentAuthUserId={currentAuthUserId}
+        />
 
         {/* Learning + Teaching */}
         <div className="mt-6 grid gap-6 md:grid-cols-2">
@@ -179,7 +184,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
-                  Skills I'm Learning
+                  Skills I&apos;m Learning
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
@@ -225,7 +230,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
-                  Skills I'm Teaching
+                  Skills I&apos;m Teaching
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">

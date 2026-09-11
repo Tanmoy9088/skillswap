@@ -46,6 +46,20 @@ export const getMySwapRequests = async (): Promise<SwapRequest[]> => {
   return (data ?? []) as SwapRequest[];
 };
 
+export const getMySwaps = async (): Promise<Swap[]> => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc("get_my_swaps");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  console.log("get_my_swaps data:", data);
+
+  return (data ?? []) as Swap[];
+};
+
 export const updateSwapRequestStatus = async ({
   requestId,
   status,
@@ -80,17 +94,17 @@ export const acceptSwapRequest = async (requestId: string) => {
   return data;
 };
 
-export const getMySwaps = async (): Promise<Swap[]> => {
-  const supabase = createClient();
+// export const getMySwaps = async (): Promise<Swap[]> => {
+//   const supabase = createClient();
 
-  const { data, error } = await supabase.rpc("get_my_swaps");
+//   const { data, error } = await supabase.rpc("get_my_swaps");
 
-  if (error) {
-    throw new Error(error.message);
-  }
+//   if (error) {
+//     throw new Error(error.message);
+//   }
 
-  return data ?? [];
-};
+//   return data ?? [];
+// };
 
 export const scheduleSwapSession = async (
   swapId: string,
