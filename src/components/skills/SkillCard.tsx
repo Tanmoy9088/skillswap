@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 
 import type { SkillDiscoveryItem } from "@/types/types/skills";
+import { hasCookie } from "cookies-next/client";
+import { is } from "zod/v4/locales";
 
 interface SkillCardProps {
   skill: SkillDiscoveryItem;
@@ -10,10 +12,12 @@ interface SkillCardProps {
 
 export default function SkillCard({ skill }: SkillCardProps) {
   const skillSlug = encodeURIComponent(skill.skill_name);
+  const isAuthenticated = hasCookie("user");
+  console.log("isAuthenticated", isAuthenticated);
 
   return (
     <article className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <Link href={`/skills/${skillSlug}`}>
+      <Link href={isAuthenticated?`/skills/${skillSlug}`:`/login`}>
         <div className="relative h-48 overflow-hidden bg-indigo-50">
           {skill.image_url ? (
             <Image
@@ -36,7 +40,7 @@ export default function SkillCard({ skill }: SkillCardProps) {
       </Link>
 
       <div className="p-5">
-        <Link href={`/skills/${skillSlug}`}>
+        <Link href={isAuthenticated?`/skills/${skillSlug}`:`/login`}>
           <h3 className="text-lg font-bold text-[#17366F]">
             {skill.skill_name}
           </h3>

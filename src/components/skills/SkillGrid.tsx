@@ -4,6 +4,7 @@ import { useSkillDiscovery } from "@/hooks/skills/useSkillDiscovery";
 import { useSkillDiscovery as useSkillDiscoveryStore } from "@/store/skillDiscovery";
 
 import SkillCard from "./SkillCard";
+import { getCookie, hasCookie } from "cookies-next/client";
 
 export default function SkillGrid() {
   const sortBy = useSkillDiscoveryStore((state) => state.sortBy);

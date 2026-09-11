@@ -3,6 +3,7 @@ import {
   type SignupPayload,
 } from "@/types/interfaces/auth.interface";
 import { createClient } from "./supabase/client";
+import { deleteCookie } from "cookies-next/client";
 
 // Signup
 export const signUp = async ({
@@ -127,6 +128,8 @@ export const logout = async () => {
   if (error) {
     throw new Error(error.message);
   }
+  deleteCookie("user");
+  deleteCookie("token");
 
   return true;
 };
