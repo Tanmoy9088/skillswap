@@ -66,7 +66,7 @@ export default function MentorProfile({
             {/* Avatar */}
             <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full bg-gray-100 ring-4 ring-indigo-50">
               <Image
-                src={profile.profile_img || "/default-avatar.png"}
+                src={profile.profile_img || "/image.png"}
                 alt={profile.name}
                 fill
                 className="object-cover"
