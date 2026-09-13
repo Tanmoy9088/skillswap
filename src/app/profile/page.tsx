@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 
 import { useCurrentProfile } from "@/hooks/use-current-profile";
-import { useUserSkills } from "@/hooks/mentors/skills/useUserSkills";
-import { useRemoveSkill } from "@/hooks/mentors/skills/useRemoveSkills";
+import { useUserSkills } from "@/hooks/skills/useUserSkills";
+import { useRemoveSkill } from "@/hooks/skills/useRemoveSkills";
 import { useGlobalStore } from "@/store/globalState";
 
 import AddSkillModal from "@/components/AddSkillModal";

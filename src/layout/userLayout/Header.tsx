@@ -85,16 +85,16 @@ const Header = () => {
           showHeader ? "translate-y-0" : "-translate-y-full"
         }`}
       >
-        <div className="mx-auto mt-3 max-w-[1500px] px-3 sm:px-5 lg:px-8">
+        <div className="mx-auto mt-3 max-w-375 px-3 sm:px-5 lg:px-8">
           <div className="relative rounded-2xl border border-white/70 bg-white/90 shadow-[0_8px_30px_rgba(79,70,229,0.08)] backdrop-blur-xl">
             {/* Main Header */}
-            <div className="flex h-[72px] items-center px-4 sm:px-6">
+            <div className="flex h-18 items-center px-4 sm:px-6">
               {/* Logo */}
               <Link
                 href="/"
                 className="group flex shrink-0 items-center gap-2.5"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 shadow-md shadow-indigo-200 transition-transform duration-200 group-hover:scale-105">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 via-indigo-500 to-violet-600 shadow-md shadow-indigo-200 transition-transform duration-200 group-hover:scale-105">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
 
@@ -150,7 +150,7 @@ const Header = () => {
                     className="group flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50/80 p-1.5 pr-3 transition-all duration-200 hover:border-indigo-100 hover:bg-indigo-50/60 hover:shadow-md hover:shadow-indigo-100"
                   >
                     <div className="relative">
-                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 p-[2px]">
+                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-indigo-500 to-violet-500 p-0.5">
                         <div className="h-full w-full overflow-hidden rounded-full bg-white">
                           <Image
                             src={profile.profile_img || "/image.png"}
@@ -165,7 +165,7 @@ const Header = () => {
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                     </div>
 
-                    <div className="max-w-[150px] text-left">
+                    <div className="max-w-37.5 text-left">
                       <p className="truncate text-sm font-bold text-gray-900">
                         {profile.name}
                       </p>
@@ -188,7 +188,7 @@ const Header = () => {
 
                     <Link
                       href="/signup"
-                      className="group rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-200"
+                      className="group rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-200"
                     >
                       Get Started
                       <span className="ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5">
@@ -205,7 +205,7 @@ const Header = () => {
                   <button
                     type="button"
                     onClick={openProfile}
-                    className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 p-[2px]"
+                    className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-indigo-500 to-violet-500 p-0.5"
                     aria-label="Open profile"
                   >
                     <div className="h-full w-full overflow-hidden rounded-full bg-white">
@@ -280,7 +280,7 @@ const Header = () => {
 
                     <Link
                       href="/signup"
-                      className="flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-3 text-sm font-bold text-white shadow-md shadow-indigo-100"
+                      className="flex items-center justify-center rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 px-4 py-3 text-sm font-bold text-white shadow-md shadow-indigo-100"
                     >
                       Get Started
                     </Link>
@@ -300,7 +300,7 @@ const Header = () => {
                         alt={profile.name}
                         width={42}
                         height={42}
-                        className="h-[42px] w-[42px] rounded-full object-cover ring-2 ring-indigo-100"
+                        className="h-10.4 w-10.5 rounded-full object-cover ring-2 ring-indigo-100"
                       />
 
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
