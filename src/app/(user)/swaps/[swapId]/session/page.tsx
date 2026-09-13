@@ -7,7 +7,7 @@ import { LiveKitRoom, VideoConference } from "@livekit/components-react";
 
 import "@livekit/components-styles";
 
-import { useSwapById } from "@/hooks/mentors/skills/useSwapById";
+import { useSwapById } from "@/hooks/skills/useSwapById";
 import { useCurrentProfile } from "@/hooks/use-current-profile";
 
 export default function SessionPage() {

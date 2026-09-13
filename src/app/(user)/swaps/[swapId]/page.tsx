@@ -10,7 +10,7 @@ import {
   User,
 } from "lucide-react";
 
-import { useSwapById } from "@/hooks/mentors/skills/useSwapById";
+import { useSwapById } from "@/hooks/skills/useSwapById";
 import Image from "next/image";
 
 export default function SwapDetailsPage() {
