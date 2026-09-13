@@ -8,6 +8,7 @@ import { useCurrentProfile } from "@/hooks/use-current-profile";
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useGlobalStore } from "@/store/globalState";
 import { uploadProfileImage } from "@/lib/uploadProfileImage";
+import Image from "next/image";
 
 interface EditProfileFormData {
   name: string;
@@ -155,7 +156,7 @@ const EditProfileModal = () => {
   const isSaving = isPending || isUploadingImage;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
       {/* Overlay */}
       <div onClick={handleClose} className="absolute inset-0 bg-black/50" />
 
@@ -185,10 +186,11 @@ const EditProfileModal = () => {
           {/* Profile Image */}
           <div className="flex flex-col items-center">
             {preview ? (
-              <img
+              <Image
                 src={preview}
                 alt="Profile preview"
                 className="h-28 w-28 rounded-full border object-cover"
+                fill
               />
             ) : (
               <div className="flex h-28 w-28 items-center justify-center rounded-full bg-indigo-200 text-4xl font-bold text-indigo-700">

@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 
-import { useSkillDetails } from "@/hooks/skills/useSkillDetails";
+import { useSkillDetails } from "@/hooks/mentors/skills/useSkillDetails";
 import SkillDetails from "@/components/skills/SkillDetails";
 
 export default function SkillDetailsPage() {
@@ -13,8 +13,10 @@ export default function SkillDetailsPage() {
     : "";
 
   const { data, isPending, isError, error } = useSkillDetails(skillName);
-  console.log("Mentor-data=>", data);
 
+  console.log("Skill details data =>", data);
+
+  // Loading
   if (isPending) {
     return (
       <main className="min-h-screen bg-[#F7F7FF] px-6 py-20">
@@ -35,6 +37,7 @@ export default function SkillDetailsPage() {
     );
   }
 
+  // Error
   if (isError) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F7F7FF] px-6">
@@ -43,7 +46,11 @@ export default function SkillDetailsPage() {
             Failed to load skill
           </h1>
 
-          <p className="mt-3 text-sm text-gray-500">{error.message}</p>
+          <p className="mt-3 text-sm text-gray-500">
+            {error instanceof Error
+              ? error.message
+              : "Something went wrong while loading the skill."}
+          </p>
 
           <p className="mt-4 rounded-lg bg-gray-50 p-3 text-xs text-gray-500">
             Requested skill: <span className="font-semibold">{skillName}</span>
@@ -53,6 +60,7 @@ export default function SkillDetailsPage() {
     );
   }
 
+  // Skill not found
   if (!data?.skill) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F7F7FF] px-6">
@@ -67,5 +75,6 @@ export default function SkillDetailsPage() {
     );
   }
 
+  // Success
   return <SkillDetails skill={data.skill} mentors={data.mentors} />;
 }

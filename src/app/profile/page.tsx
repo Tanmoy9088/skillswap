@@ -11,35 +11,28 @@ import {
   Sparkles,
   Trash2,
   UserRound,
-  X,
 } from "lucide-react";
 
 import { useCurrentProfile } from "@/hooks/use-current-profile";
-import { useUserSkills } from "@/hooks/skills/useUserSkills";
-import { useRemoveSkill } from "@/hooks/skills/useRemoveSkills";
+import { useUserSkills } from "@/hooks/mentors/skills/useUserSkills";
+import { useRemoveSkill } from "@/hooks/mentors/skills/useRemoveSkills";
 import { useGlobalStore } from "@/store/globalState";
 
 import AddSkillModal from "@/components/AddSkillModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
+import SessionOptionsManager from "@/components/mentors/SessionOptionsManager";
 
 export default function ProfilePage() {
-  const { data: profile, isLoading: profileLoading } =
-    useCurrentProfile();
+  const { data: profile, isLoading: profileLoading } = useCurrentProfile();
 
-  const { data: skills, isLoading: skillsLoading } =
-    useUserSkills();
+  const { data: skills, isLoading: skillsLoading } = useUserSkills();
 
-  const { mutate: removeSkill, isPending: isRemoving } =
-    useRemoveSkill();
+  const { mutate: removeSkill, isPending: isRemoving } = useRemoveSkill();
 
-  const openAddSkill = useGlobalStore(
-    (state) => state.openAddSkill,
-  );
+  const openAddSkill = useGlobalStore((state) => state.openAddSkill);
 
-  const openEditProfile = useGlobalStore(
-    (state) => state.openEditProfile,
-  );
+  const openEditProfile = useGlobalStore((state) => state.openEditProfile);
 
   if (profileLoading) {
     return <LoadingSkeleton />;
@@ -58,7 +51,9 @@ export default function ProfilePage() {
       {/* Decorative background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-indigo-200/30 blur-3xl" />
+
         <div className="absolute right-0 top-40 h-96 w-96 rounded-full bg-purple-200/20 blur-3xl" />
+
         <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-blue-200/20 blur-3xl" />
       </div>
 
@@ -98,13 +93,11 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-green-500">
-                    <CheckCircle2
-                      size={15}
-                      className="text-white"
-                    />
+                    <CheckCircle2 size={15} className="text-white" />
                   </div>
                 </div>
 
+                {/* Name / email */}
                 <div className="pb-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
@@ -116,13 +109,11 @@ export default function ProfilePage() {
                     </span>
                   </div>
 
-                  <p className="mt-1 text-sm text-gray-500">
-                    {profile?.email}
-                  </p>
+                  <p className="mt-1 text-sm text-gray-500">{profile?.email}</p>
                 </div>
               </div>
 
-              {/* Edit */}
+              {/* Edit Profile */}
               <button
                 type="button"
                 onClick={openEditProfile}
@@ -138,9 +129,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2">
                 <UserRound size={16} className="text-indigo-500" />
 
-                <p className="text-sm font-semibold text-gray-700">
-                  About me
-                </p>
+                <p className="text-sm font-semibold text-gray-700">About me</p>
               </div>
 
               <p className="mt-2 text-sm leading-6 text-gray-500">
@@ -153,6 +142,7 @@ export default function ProfilePage() {
 
         {/* Stats */}
         <section className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {/* Total Skills */}
           <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50">
               <BookOpen className="h-5 w-5 text-indigo-600" />
@@ -162,11 +152,10 @@ export default function ProfilePage() {
               {totalSkills}
             </p>
 
-            <p className="text-sm text-gray-500">
-              Total Skills
-            </p>
+            <p className="text-sm text-gray-500">Total Skills</p>
           </div>
 
+          {/* Skills Offered */}
           <div className="rounded-2xl border border-green-100 bg-white p-5 shadow-sm">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
               <Sparkles className="h-5 w-5 text-green-600" />
@@ -176,11 +165,10 @@ export default function ProfilePage() {
               {offeredSkills.length}
             </p>
 
-            <p className="text-sm text-gray-500">
-              Skills Offered
-            </p>
+            <p className="text-sm text-gray-500">Skills Offered</p>
           </div>
 
+          {/* Skills Wanted */}
           <div className="col-span-2 rounded-2xl border border-purple-100 bg-white p-5 shadow-sm sm:col-span-1">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50">
               <BookOpen className="h-5 w-5 text-purple-600" />
@@ -190,13 +178,14 @@ export default function ProfilePage() {
               {wantedSkills.length}
             </p>
 
-            <p className="text-sm text-gray-500">
-              Skills Wanted
-            </p>
+            <p className="text-sm text-gray-500">Skills Wanted</p>
           </div>
         </section>
 
+        {/* ========================================================= */}
         {/* Skills I Offer */}
+        {/* ========================================================= */}
+
         <section className="mt-8">
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -235,10 +224,7 @@ export default function ProfilePage() {
               ))}
             </div>
           ) : offeredSkills.length === 0 ? (
-            <EmptySkills
-              type="offered"
-              onAdd={() => openAddSkill("offered")}
-            />
+            <EmptySkills type="offered" onAdd={() => openAddSkill("offered")} />
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {offeredSkills.map((skill) => (
@@ -254,7 +240,10 @@ export default function ProfilePage() {
           )}
         </section>
 
+        {/* ========================================================= */}
         {/* Skills I Want */}
+        {/* ========================================================= */}
+
         <section className="mt-10">
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -293,10 +282,7 @@ export default function ProfilePage() {
               ))}
             </div>
           ) : wantedSkills.length === 0 ? (
-            <EmptySkills
-              type="wanted"
-              onAdd={() => openAddSkill("wanted")}
-            />
+            <EmptySkills type="wanted" onAdd={() => openAddSkill("wanted")} />
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {wantedSkills.map((skill) => (
@@ -313,11 +299,18 @@ export default function ProfilePage() {
         </section>
       </div>
 
+      {/* Modals */}
       <AddSkillModal />
       <EditProfileModal />
     </main>
   );
 }
+
+/*
+|--------------------------------------------------------------------------
+| Skill Profile Card
+|--------------------------------------------------------------------------
+*/
 
 function SkillProfileCard({
   skill,
@@ -327,27 +320,49 @@ function SkillProfileCard({
 }: {
   skill: {
     id: string;
-    skill_name: string;
+    skill_type: "offered" | "wanted";
     proficiency_level?: string | null;
-    image_url?: string | null;
-    category?: string | null;
     description?: string | null;
-    token_rate?: number | null;
+
+    skills: {
+      id: string;
+      name: string;
+      category: string | null;
+      description: string | null;
+      image_url: string | null;
+      is_active: boolean;
+    } | null;
   };
+
   type: "offered" | "wanted";
   isRemoving: boolean;
   onRemove: () => void;
 }) {
   const isOffered = type === "offered";
 
+  /*
+   * Master skill comes from the skills table.
+   */
+  const masterSkill = skill.skills;
+
+  /*
+   * Safety check.
+   */
+  if (!masterSkill) {
+    return null;
+  }
+
   return (
     <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+      {/* ========================================================= */}
       {/* Image */}
+      {/* ========================================================= */}
+
       <div className="relative h-44 overflow-hidden bg-indigo-50">
-        {skill.image_url ? (
+        {masterSkill.image_url ? (
           <Image
-            src={skill.image_url}
-            alt={skill.skill_name}
+            src={masterSkill.image_url}
+            alt={masterSkill.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover transition duration-500 group-hover:scale-105"
@@ -355,19 +370,15 @@ function SkillProfileCard({
         ) : (
           <div
             className={`flex h-full items-center justify-center ${
-              isOffered
-                ? "bg-indigo-50"
-                : "bg-green-50"
+              isOffered ? "bg-indigo-50" : "bg-green-50"
             }`}
           >
             <span
               className={`text-6xl font-bold ${
-                isOffered
-                  ? "text-indigo-200"
-                  : "text-green-200"
+                isOffered ? "text-indigo-200" : "text-green-200"
               }`}
             >
-              {skill.skill_name.charAt(0).toUpperCase()}
+              {masterSkill.name.charAt(0).toUpperCase()}
             </span>
           </div>
         )}
@@ -375,9 +386,7 @@ function SkillProfileCard({
         {/* Type badge */}
         <span
           className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold shadow-sm ${
-            isOffered
-              ? "bg-white text-indigo-600"
-              : "bg-white text-green-600"
+            isOffered ? "bg-white text-indigo-600" : "bg-white text-green-600"
           }`}
         >
           {isOffered ? "I Offer" : "I Want"}
@@ -388,25 +397,28 @@ function SkillProfileCard({
           type="button"
           disabled={isRemoving}
           onClick={onRemove}
-          aria-label={`Remove ${skill.skill_name}`}
+          aria-label={`Remove ${masterSkill.name}`}
           className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
         >
           <Trash2 size={16} />
         </button>
       </div>
 
+      {/* ========================================================= */}
       {/* Content */}
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900">
-          {skill.skill_name}
-        </h3>
+      {/* ========================================================= */}
 
-        {skill.category && (
+      <div className="p-5">
+        <h3 className="text-lg font-bold text-gray-900">{masterSkill.name}</h3>
+
+        {/* Category */}
+        {masterSkill.category && (
           <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-400">
-            {skill.category}
+            {masterSkill.category}
           </p>
         )}
 
+        {/* Proficiency */}
         {skill.proficiency_level && (
           <div className="mt-3">
             <span
@@ -421,33 +433,32 @@ function SkillProfileCard({
           </div>
         )}
 
+        {/* Personal description */}
         {skill.description && (
           <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-500">
             {skill.description}
           </p>
         )}
 
-        {isOffered &&
-          skill.token_rate !== null &&
-          skill.token_rate !== undefined && (
-            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-              <span className="text-xs text-gray-400">
-                Session rate
-              </span>
+        {/* ======================================================= */}
+        {/* Mentor Session Options */}
+        {/* ======================================================= */}
 
-              <span className="font-bold text-indigo-600">
-                {skill.token_rate} Token
-                <span className="font-normal text-gray-400">
-                  {" "}
-                  / hr
-                </span>
-              </span>
-            </div>
-          )}
+        {isOffered && (
+          <div className="mt-5 border-t border-gray-100 pt-5">
+            <SessionOptionsManager userSkillId={skill.id} />
+          </div>
+        )}
       </div>
     </article>
   );
 }
+
+/*
+|--------------------------------------------------------------------------
+| Empty Skills
+|--------------------------------------------------------------------------
+*/
 
 function EmptySkills({
   type,
@@ -479,9 +490,7 @@ function EmptySkills({
       </div>
 
       <h3 className="mt-4 font-semibold text-gray-900">
-        {isOffered
-          ? "Share your expertise"
-          : "Start your learning journey"}
+        {isOffered ? "Share your expertise" : "Start your learning journey"}
       </h3>
 
       <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
