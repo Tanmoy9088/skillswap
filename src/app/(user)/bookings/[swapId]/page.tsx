@@ -14,15 +14,13 @@ import {
   Users,
 } from "lucide-react";
 
-import { useSwapById } from "@/hooks/mentors/skills/useSwapById";
-import { useSessionOptions } from "@/hooks/mentors/skills/useSessionOptions";
-import { useRequestScheduleSwap } from "@/hooks/mentors/skills/useScheduleSwapSession";
+import { useSwapById } from "@/hooks/skills/useSwapById";
+import { useSessionOptions } from "@/hooks/skills/useSessionOptions";
+import { useRequestScheduleSwap } from "@/hooks/skills/useScheduleSwapSession";
 
 import { getMentorAvailability } from "@/lib/mentorAvailability";
 
-import type {
-  BookingSessionOption,
-} from "@/types/types/swaps";
+import type { BookingSessionOption } from "@/types/types/swaps";
 
 type AvailabilitySlot = {
   id?: string;
