@@ -1,8 +1,33 @@
 import type { MetadataRoute } from "next";
 
+import { createClient } from "@/lib/supabase/server";
+
 const siteUrl = "https://skillswap-mu-pied.vercel.app";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+interface Skill {
+  name: string;
+  updated_at?: string | null;
+  created_at?: string | null;
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const supabase = await createClient();
+
+  const { data: skills } = await supabase
+    .from("skills")
+    .select("name, created_at")
+    .eq("is_active", true)
+    .order("name");
+
+  const skillUrls: MetadataRoute.Sitemap = ((skills ?? []) as Skill[]).map(
+    (skill) => ({
+      url: `${siteUrl}/skills/${encodeURIComponent(skill.name)}`,
+      lastModified: skill.created_at ? new Date(skill.created_at) : new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    }),
+  );
+
   return [
     {
       url: siteUrl,
@@ -34,5 +59,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.5,
     },
+
+    ...skillUrls,
   ];
 }
