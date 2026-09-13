@@ -74,7 +74,7 @@ export const metadata: Metadata = {
       "Discover mentors, learn new skills, teach what you know, and exchange knowledge with SkillSwap+.",
     images: [
       {
-        url: "/images/og-image.png",
+        url: "https://skillswap-mu-pied.vercel.app/images/og-image.png",
         width: 1200,
         height: 630,
         alt: "SkillSwap+ - Learn, Teach & Exchange Skills",
@@ -87,7 +87,7 @@ export const metadata: Metadata = {
     title: "SkillSwap+ | Learn, Teach & Exchange Skills",
     description:
       "Discover mentors, learn new skills, teach what you know, and exchange knowledge with SkillSwap+.",
-    images: ["/images/og-image.png"],
+    images: ["https://skillswap-mu-pied.vercel.app/images/og-image.png"],
   },
 
   icons: {
