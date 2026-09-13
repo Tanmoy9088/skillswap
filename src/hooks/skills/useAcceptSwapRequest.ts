@@ -14,6 +14,10 @@ export const useAcceptSwapRequest = () => {
       queryClient.invalidateQueries({
         queryKey: ["swap-requests"],
       });
+
+      queryClient.invalidateQueries({
+        queryKey: ["my-swaps"],
+      });
     },
   });
 };

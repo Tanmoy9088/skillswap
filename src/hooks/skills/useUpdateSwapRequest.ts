@@ -1,13 +1,8 @@
 "use client";
 
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import {
-  updateSwapRequestStatus,
-} from "@/lib/swapRequests";
+import { updateSwapRequestStatus } from "@/lib/swapRequests";
 
 export const useUpdateSwapRequest = () => {
   const queryClient = useQueryClient();
@@ -18,6 +13,10 @@ export const useUpdateSwapRequest = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["swap-requests"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["my-swaps"],
       });
     },
   });

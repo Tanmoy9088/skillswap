@@ -17,9 +17,13 @@ export const useCreateSwapRating = () => {
     mutationFn: ({ swapId, rating, review }: CreateSwapRatingInput) =>
       createSwapRating(swapId, rating, review),
 
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["swaps"],
+        queryKey: ["my-swaps"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["swap-rating", variables.swapId],
       });
     },
   });

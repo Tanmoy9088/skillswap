@@ -1,23 +1,18 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { scheduleSwapSession } from "@/lib/swapRequests";
 
-export const useScheduleSwapSession = () => {
+import { requestScheduleSwap } from "@/lib/swapRequests";
+
+export const useRequestScheduleSwap = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      swapId,
-      scheduledAt,
-    }: {
-      swapId: string;
-      scheduledAt: string;
-    }) => scheduleSwapSession(swapId, scheduledAt),
+    mutationFn: requestScheduleSwap,
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["swaps"],
+        queryKey: ["my-swaps"],
       });
 
       queryClient.invalidateQueries({
