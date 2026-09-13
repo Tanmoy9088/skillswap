@@ -35,6 +35,9 @@ export default function SwapRequestModal({
 
   const createRequest = useCreateSwapRequest();
 
+  /**
+   * Only skills offered by this mentor.
+   */
   const offeredSkills = skills.filter(
     (skill) => skill.skill_type === "offered",
   );
@@ -51,8 +54,16 @@ export default function SwapRequestModal({
     },
   });
 
+  /**
+   * Reset form whenever:
+   *
+   * - modal opens
+   * - selected skill changes
+   */
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     reset({
       skillId: selectedSkillId ?? offeredSkills[0]?.id ?? "",
@@ -126,30 +137,46 @@ export default function SwapRequestModal({
               Choose a skill
             </label>
 
-            <select
-              id="swap-skill"
-              {...register("skillId", {
-                required: "Please select a skill.",
-                onChange: (event) => {
-                  setSelectedSwapSkillId(event.target.value);
-                },
-              })}
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            >
-              <option value="">Select a skill</option>
+            {offeredSkills.length === 0 ? (
+              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500">
+                This mentor has no offered skills available.
+              </div>
+            ) : (
+              <select
+                id="swap-skill"
+                {...register("skillId", {
+                  required: "Please select a skill.",
+                  onChange: (event) => {
+                    setSelectedSwapSkillId(event.target.value);
+                  },
+                })}
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              >
+                <option value="">Select a skill</option>
 
-              {offeredSkills.map((skill) => (
-                <option key={skill.id} value={skill.id}>
-                  {skill.skill_name} — {skill.token_rate} tokens
-                </option>
-              ))}
-            </select>
+                {offeredSkills.map((skill) => {
+                  const skillName =
+                    skill.skill_name || skill.skills?.name || "Unknown Skill";
+
+                  return (
+                    <option key={skill.id} value={skill.id}>
+                      {skillName}
+                    </option>
+                  );
+                })}
+              </select>
+            )}
 
             {errors.skillId && (
               <p className="mt-1 text-xs text-red-500">
                 {errors.skillId.message}
               </p>
             )}
+
+            <p className="mt-2 text-xs text-gray-400">
+              Session duration and token cost will be selected later from the
+              mentor&apos;s available session options.
+            </p>
           </div>
 
           {/* Message */}

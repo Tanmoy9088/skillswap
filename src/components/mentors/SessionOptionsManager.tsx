@@ -5,13 +5,13 @@
 import { useState } from "react";
 import { Check, Clock3, Coins, Loader2, Pencil, Plus, X } from "lucide-react";
 
-import { useMySessionOptions } from "@/hooks/mentors/skills/useMySessionOptions";
+import { useMySessionOptions } from "@/hooks/skills/useMySessionOptions";
 
-import { useCreateSessionOption } from "@/hooks/mentors/skills/useCreateSessionIption";
+import { useCreateSessionOption } from "@/hooks/skills/useCreateSessionOption";
 
-import { useUpdateSessionOption } from "@/hooks/mentors/skills/useUpdateSessionOption";
+import { useUpdateSessionOption } from "@/hooks/skills/useUpdateSessionOption";
 
-import { useDeactivateSessionOption } from "@/hooks/mentors/skills/useDeactivateSessionOption";
+import { useDeactivateSessionOption } from "@/hooks/skills/useDeactivateSessionOption";
 
 import type { SessionDuration, UserSkillSession } from "@/types/types/swaps";
 
