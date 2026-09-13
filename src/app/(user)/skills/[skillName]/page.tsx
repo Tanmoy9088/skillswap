@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 
-import { useSkillDetails } from "@/hooks/mentors/skills/useSkillDetails";
+import { useSkillDetails } from "@/hooks/skills/useSkillDetails";
 import SkillDetails from "@/components/skills/SkillDetails";
 
 export default function SkillDetailsPage() {
