@@ -35,7 +35,7 @@ const UserManagement = () => {
     isLoading,
     error: Error,
   } = useUsers(page, pageSize);
-  console.log("uSERS:", users);
+
   const [activeTab, setActiveTab] = useState("All Users");
 
   return (

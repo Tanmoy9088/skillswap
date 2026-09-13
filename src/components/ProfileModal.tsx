@@ -14,7 +14,6 @@ const ProfileModal = () => {
   const queryClient = useQueryClient();
 
   const { data: profile } = useCurrentProfile();
-  console.log("currentProfile:", profile);
 
   const { mutate: logout, isPending } = useLogout();
 

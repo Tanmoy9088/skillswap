@@ -959,20 +959,17 @@ export default function BookingPage() {
                       setAvailabilityError(null);
 
                       try {
-                        const result =
-                          await requestScheduleMutation.mutateAsync({
-                            swapId: swap.id,
-                            sessionOptionId: selectedOption.id,
-                            scheduledAt: date.toISOString(),
-                          });
+                        await requestScheduleMutation.mutateAsync({
+                          swapId: swap.id,
+                          sessionOptionId: selectedOption.id,
+                          scheduledAt: date.toISOString(),
+                        });
 
                         setSuccessMessage(
                           `Your ${selectedOption.duration_minutes}-minute session request has been sent to ${swap.mentor_name}.`,
                         );
 
                         setIsSuccess(true);
-
-                        console.log("SCHEDULE REQUEST RESULT:", result);
                       } catch (error) {
                         setAvailabilityError(
                           error instanceof Error

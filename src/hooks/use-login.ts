@@ -13,7 +13,6 @@ export const useLogin = () => {
     mutationKey: ["use-login"],
     mutationFn: login,
     onSuccess: async (res) => {
-      console.log("use-login success=>", res);
       const cookieOptions = {
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: "/",

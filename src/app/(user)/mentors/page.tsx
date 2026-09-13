@@ -41,23 +41,6 @@ const DiscoverMentorsPage = () => {
 
   const discoveryItems = data?.pages.flatMap((page) => page.items ?? []) ?? [];
 
-  console.log("MENTORS:", discoveryItems);
-
-  /*
-   * Convert SkillDiscoveryItem -> SkillMentor
-   *
-   * The discovery RPC returns:
-   * mentor_name
-   * mentor_profile_img
-   * average_rating
-   * total_ratings
-   *
-   * MentorCard expects:
-   * name
-   * profile_img
-   * rating
-   * total_ratings
-   */
   const mentors: SkillMentor[] = discoveryItems.map((item) => ({
     id: item.id,
     auth_user_id: item.auth_user_id,

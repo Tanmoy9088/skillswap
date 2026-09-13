@@ -50,8 +50,6 @@ export const getMyTokenTransactions = async (): Promise<TokenTransaction[]> => {
     error: userError,
   } = await supabase.auth.getUser();
 
-  console.log("Wallet current user:", user?.id);
-  console.log("Wallet user error:", userError);
 
   const { data, error } = await supabase
     .from("token_transactions")
@@ -60,8 +58,6 @@ export const getMyTokenTransactions = async (): Promise<TokenTransaction[]> => {
     )
     .order("created_at", { ascending: false });
 
-  console.log("Wallet transactions:", data);
-  console.log("Wallet transaction error:", error);
 
   if (error) {
     throw new Error(error.message);

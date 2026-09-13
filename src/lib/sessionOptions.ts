@@ -136,15 +136,6 @@ export const createSessionOption = async ({
     error: userError,
   } = await supabase.auth.getUser();
 
-  console.log("==========================================");
-  console.log("CREATE SESSION OPTION");
-  console.log("AUTH USER:", user?.id);
-  console.log("AUTH ERROR:", userError);
-  console.log("USER SKILL ID:", userSkillId);
-  console.log("DURATION:", durationMinutes);
-  console.log("TOKEN RATE:", tokenRate);
-  console.log("==========================================");
-
   if (userError) {
     throw new Error(
       `Unable to verify authenticated user: ${userError.message}`,

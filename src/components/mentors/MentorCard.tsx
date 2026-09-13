@@ -7,7 +7,6 @@ interface MentorCardProps {
   mentor: SkillMentor;
 }
 export default function MentorCard({ mentor }: MentorCardProps) {
-  console.log("MMMMMMMM", mentor);
   return (
     <article className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
       {" "}

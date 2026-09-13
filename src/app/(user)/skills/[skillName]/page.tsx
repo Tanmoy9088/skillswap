@@ -14,8 +14,6 @@ export default function SkillDetailsPage() {
 
   const { data, isPending, isError, error } = useSkillDetails(skillName);
 
-  console.log("Skill details data =>", data);
-
   // Loading
   if (isPending) {
     return (
