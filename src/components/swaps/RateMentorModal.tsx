@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Star, X } from "lucide-react";
 
-import { useCreateSwapRating } from "@/hooks/mentors/skills/useCreateSwapRating";
-import { useUpdateSwapRating } from "@/hooks/mentors/skills/useUpdateSwapRating";
-import { SwapRating } from "@/hooks/mentors/skills/useSwapRating";
+import { useCreateSwapRating } from "@/hooks/skills/useCreateSwapRating";
+import { useUpdateSwapRating } from "@/hooks/skills/useUpdateSwapRating";
+import { SwapRating } from "@/hooks/skills/useSwapRating";
 
 interface RateMentorModalProps {
   swapId: string;

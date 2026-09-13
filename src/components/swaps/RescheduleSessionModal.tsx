@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Calendar, CheckCircle2, Clock, Loader2, X } from "lucide-react";
 
 import { getMentorAvailability } from "@/lib/mentorAvailability";
-import { useProposeSwapReschedule } from "@/hooks/mentors/skills/useProposeSwapReschedule";
+import { useProposeSwapReschedule } from "@/hooks/skills/useProposeSwapReschedule";
 
 interface RescheduleSessionModalProps {
   swapId: string;

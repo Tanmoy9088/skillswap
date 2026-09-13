@@ -23,12 +23,12 @@ import {
 import RescheduleSessionModal from "@/components/swaps/RescheduleSessionModal";
 import RateMentorModal from "@/components/swaps/RateMentorModal";
 
-import { useConfirmScheduleSwap } from "@/hooks/mentors/skills/useConfirmScheduleSwap";
-import { useRespondToReschedule } from "@/hooks/mentors/skills/useRespondToReschedule";
-import { useStartSwapSession } from "@/hooks/mentors/skills/useStartSwapSession";
-import { useCompleteSwapSession } from "@/hooks/mentors/skills/useCompleteSwapSession";
-import { useCancelSwapSession } from "@/hooks/mentors/skills/useCancelSwapSession";
-import { useSwapRating } from "@/hooks/mentors/skills/useSwapRating";
+import { useConfirmScheduleSwap } from "@/hooks/skills/useConfirmScheduleSwap";
+import { useRespondToReschedule } from "@/hooks/skills/useRespondToReschedule";
+import { useStartSwapSession } from "@/hooks/skills/useStartSwapSession";
+import { useCompleteSwapSession } from "@/hooks/skills/useCompleteSwapSession";
+import { useCancelSwapSession } from "@/hooks/skills/useCancelSwapSession";
+import { useSwapRating } from "@/hooks/skills/useSwapRating";
 
 import type { Swap } from "@/types/types/swaps";
 

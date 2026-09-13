@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Calendar, CheckCircle2, Loader2, X, Clock, Coins } from "lucide-react";
 
-import { useRequestScheduleSwap } from "@/hooks/mentors/skills/useScheduleSwapSession";
-import { useSessionOptions } from "@/hooks/mentors/skills/useSessionOptions";
+import { useRequestScheduleSwap } from "@/hooks/skills/useScheduleSwapSession";
+import { useSessionOptions } from "@/hooks/skills/useSessionOptions";
 import { getMentorAvailability } from "@/lib/mentorAvailability";
 
 import type { BookingSessionOption } from "@/types/types/swaps";
