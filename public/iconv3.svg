@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <!-- Sleek Dark Background Shield -->
+  <rect width="64" height="64" rx="18" fill="#090D16"/>
+
+  <!-- Glowing Outer Glow Filter -->
+  <defs>
+    <filter id="purple-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Stylized Flowing 'S' Swap Path (Electric Blue) -->
+  <path d="M 40 20 C 26 20, 18 24, 18 32 C 18 40, 46 32, 46 42 C 46 48, 36 50, 22 48" 
+        fill="none" stroke="#3B82F6" stroke-width="5.5" stroke-linecap="round"/>
+  
+  <!-- Smooth Blue Terminal Arrowhead -->
+  <path d="M 33 14 L 41 20 L 33 26" 
+        fill="none" stroke="#3B82F6" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Crisp White Return Accent -->
+  <path d="M 28 54 L 20 48 L 28 42" 
+        fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Four-Point Modern Sparkle Badge (+) (Electric Purple Glow) -->
+  <g filter="url(#purple-glow)">
+    <!-- Main Sparkle Body -->
+    <path d="M 48 10 C 48 15, 50 17, 55 17 C 50 17, 48 19, 48 24 C 48 19, 46 17, 41 17 C 46 17, 48 15, 48 10 Z" 
+          fill="#C084FC"/>
+  </g>
+
+  <!-- Secondary Mini White Sparkle -->
+  <path d="M 20 14 C 20 16.5, 21 17.5, 23.5 17.5 C 21 17.5, 20 18.5, 20 21 C 20 18.5, 19 17.5, 16.5 17.5 C 19 17.5, 20 16.5, 20 14 Z" 
+        fill="#FFFFFF" opacity="0.9"/>
+</svg>
