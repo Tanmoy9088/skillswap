@@ -4,14 +4,16 @@ import { useSkillDiscovery } from "@/hooks/skills/useSkillDiscovery";
 import { useSkillDiscovery as useSkillDiscoveryStore } from "@/store/skillDiscovery";
 
 import SkillCard from "./SkillCard";
-import { getCookie, hasCookie } from "cookies-next/client";
 
 export default function SkillGrid() {
   const sortBy = useSkillDiscoveryStore((state) => state.sortBy);
-
   const setSortBy = useSkillDiscoveryStore((state) => state.setSortBy);
 
   const { data, isPending, isError, error, isFetching } = useSkillDiscovery();
+
+  // ================================
+  // LOADING
+  // ================================
 
   if (isPending) {
     return (
@@ -30,6 +32,10 @@ export default function SkillGrid() {
     );
   }
 
+  // ================================
+  // ERROR
+  // ================================
+
   if (isError) {
     return (
       <div className="rounded-2xl border border-red-100 bg-white p-8 text-center">
@@ -37,10 +43,18 @@ export default function SkillGrid() {
           Unable to load skills
         </h2>
 
-        <p className="mt-2 text-sm text-gray-500">{error.message}</p>
+        <p className="mt-2 text-sm text-gray-500">
+          {error instanceof Error
+            ? error.message
+            : "Something went wrong while loading skills."}
+        </p>
       </div>
     );
   }
+
+  // ================================
+  // DATA
+  // ================================
 
   const pages = data?.pages ?? [];
 
@@ -50,7 +64,10 @@ export default function SkillGrid() {
 
   return (
     <div>
-      {/* Header */}
+      {/* ================================
+          HEADER
+      ================================= */}
+
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-[#17366F]">Explore Skills</h2>
@@ -59,6 +76,8 @@ export default function SkillGrid() {
             Discover skills offered by our community.
           </p>
         </div>
+
+        {/* SORT */}
 
         <div className="flex items-center gap-2">
           <label htmlFor="skill-sort" className="text-sm text-gray-500">
@@ -73,7 +92,9 @@ export default function SkillGrid() {
                 event.target.value as
                   | "Most Relevant"
                   | "Highest Rated"
-                  | "Lowest Token Rate",
+                  | "Lowest Token Rate"
+                  | "Highest Token Rate"
+                  | "Newest",
               )
             }
             className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-[#17366F] outline-none focus:border-indigo-500"
@@ -83,18 +104,28 @@ export default function SkillGrid() {
             <option value="Highest Rated">Highest Rated</option>
 
             <option value="Lowest Token Rate">Lowest Token Rate</option>
+
+            <option value="Highest Token Rate">Highest Token Rate</option>
+
+            <option value="Newest">Newest</option>
           </select>
         </div>
       </div>
 
-      {/* Count */}
+      {/* ================================
+          COUNT
+      ================================= */}
+
       <div className="mb-5 text-sm text-[#53617A]">
         Showing{" "}
         <span className="font-semibold text-[#17366F]">{skills.length}</span> of{" "}
         <span className="font-semibold text-[#17366F]">{total}</span> skills
       </div>
 
-      {/* Empty state */}
+      {/* ================================
+          EMPTY STATE
+      ================================= */}
+
       {skills.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-16 text-center">
           <h3 className="text-lg font-bold text-[#17366F]">No skills found</h3>
@@ -104,6 +135,10 @@ export default function SkillGrid() {
           </p>
         </div>
       ) : (
+        /* ================================
+           SKILL GRID
+        ================================= */
+
         <div
           className={`grid gap-6 md:grid-cols-2 xl:grid-cols-3 ${
             isFetching ? "opacity-70" : ""

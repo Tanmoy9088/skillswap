@@ -4,13 +4,13 @@ import Link from "next/link";
 import { ArrowLeft, Coins, Users } from "lucide-react";
 import type {
   SkillDetails as SkillDetailsType,
-  SkillDiscoveryItem,
+  SkillMentor,
 } from "@/types/types/skills";
 import MentorCard from "../mentors/MentorCard";
 
 interface SkillDetailsProps {
   skill: SkillDetailsType;
-  mentors: SkillDiscoveryItem[];
+  mentors: SkillMentor[];
 }
 
 export default function SkillDetails({ skill, mentors }: SkillDetailsProps) {
