@@ -12,13 +12,9 @@ export default function MentorProfilePage() {
     ? decodeURIComponent(params.authUserId)
     : "";
 
-  const {
-    data,
-    isPending,
-    isError,
-    error,
-  } = useMentorProfile(authUserId);
+  const { data, isPending, isError, error } = useMentorProfile(authUserId);
 
+  // Loading
   if (isPending) {
     return (
       <main className="min-h-screen bg-[#F7F7FF] px-6 py-20">
@@ -30,16 +26,14 @@ export default function MentorProfilePage() {
 
             <div>
               <div className="h-10 w-64 rounded bg-gray-200" />
+
               <div className="mt-4 h-5 w-96 rounded bg-gray-200" />
             </div>
           </div>
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="h-56 rounded-2xl bg-gray-200"
-              />
+              <div key={item} className="h-56 rounded-2xl bg-gray-200" />
             ))}
           </div>
         </div>
@@ -47,6 +41,7 @@ export default function MentorProfilePage() {
     );
   }
 
+  // Error
   if (isError) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F7F7FF] px-6">
@@ -56,13 +51,16 @@ export default function MentorProfilePage() {
           </h1>
 
           <p className="mt-3 text-sm text-gray-500">
-            {error.message}
+            {error instanceof Error
+              ? error.message
+              : "Something went wrong while loading this mentor."}
           </p>
         </div>
       </main>
     );
   }
 
+  // Mentor not found
   if (!data?.profile) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F7F7FF] px-6">
@@ -79,6 +77,7 @@ export default function MentorProfilePage() {
     );
   }
 
+  // Success
   return (
     <MentorProfile
       profile={data.profile}

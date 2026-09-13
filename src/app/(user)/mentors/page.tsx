@@ -3,12 +3,16 @@
 import { Search, SlidersHorizontal, Star, Users } from "lucide-react";
 
 import { useSkillDiscovery } from "@/hooks/skills/useSkillDiscovery";
+
 import {
   useSkillDiscovery as useSkillDiscoveryStore,
   type SkillLevel,
 } from "@/store/skillDiscovery";
+
 import { MentorGridSkeleton } from "@/components/mentors/MentorGridSkeleton";
 import MentorCard from "@/components/mentors/MentorCard";
+
+import type { SkillMentor } from "@/types/types/skills";
 
 const DiscoverMentorsPage = () => {
   const {
@@ -35,12 +39,45 @@ const DiscoverMentorsPage = () => {
     isFetchingNextPage,
   } = useSkillDiscovery();
 
-  const mentors = data?.pages.flatMap((page) => page.items ?? []) ?? [];
-  console.log("MENTORS:", mentors);
+  const discoveryItems = data?.pages.flatMap((page) => page.items ?? []) ?? [];
+
+  console.log("MENTORS:", discoveryItems);
+
+  /*
+   * Convert SkillDiscoveryItem -> SkillMentor
+   *
+   * The discovery RPC returns:
+   * mentor_name
+   * mentor_profile_img
+   * average_rating
+   * total_ratings
+   *
+   * MentorCard expects:
+   * name
+   * profile_img
+   * rating
+   * total_ratings
+   */
+  const mentors: SkillMentor[] = discoveryItems.map((item) => ({
+    id: item.id,
+    auth_user_id: item.auth_user_id,
+    skill_id: item.skill_id,
+    skill_name: item.skill_name,
+    proficiency_level: item.proficiency_level,
+    description: item.description,
+    token_rate: item.token_rate,
+    name: item.mentor_name,
+    bio: null,
+    profile_img: item.mentor_profile_img,
+    rating: Number(item.average_rating ?? 0),
+    total_ratings: Number(item.total_ratings ?? 0),
+    image_url: item.image_url,
+  }));
+
   const categories = [
     "All",
     ...Array.from(
-      new Set(mentors.map((mentor) => mentor.category).filter(Boolean)),
+      new Set(discoveryItems.map((mentor) => mentor.category).filter(Boolean)),
     ),
   ];
 
@@ -75,6 +112,7 @@ const DiscoverMentorsPage = () => {
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            {/* Search */}
             <div className="relative lg:col-span-2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
 
@@ -87,18 +125,20 @@ const DiscoverMentorsPage = () => {
               />
             </div>
 
+            {/* Category */}
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value)}
               className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
             >
               {categories.map((item) => (
-                <option key={item} value={item ?? "All"}>
+                <option key={item} value={item}>
                   {item || "All Categories"}
                 </option>
               ))}
             </select>
 
+            {/* Skill Level */}
             <select
               value={skillLevel}
               onChange={(event) =>
@@ -107,23 +147,31 @@ const DiscoverMentorsPage = () => {
               className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
             >
               <option value="All">All Levels</option>
+
               <option value="Beginner">Beginner</option>
+
               <option value="Intermediate">Intermediate</option>
+
               <option value="Advanced">Advanced</option>
+
               <option value="Expert">Expert</option>
             </select>
 
+            {/* Sort */}
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value)}
               className="h-11 rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
             >
               <option value="Most Relevant">Most Relevant</option>
+
               <option value="Highest Rated">Highest Rated</option>
+
               <option value="Lowest Token Rate">Lowest Token Rate</option>
             </select>
           </div>
 
+          {/* Rating */}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <span className="mr-1 text-sm font-medium text-gray-600">
               Rating:
@@ -174,7 +222,11 @@ const DiscoverMentorsPage = () => {
           <div className="rounded-2xl border border-red-100 bg-white p-10 text-center shadow-sm">
             <h2 className="font-bold text-red-600">Failed to load mentors</h2>
 
-            <p className="mt-2 text-sm text-gray-500">{error.message}</p>
+            <p className="mt-2 text-sm text-gray-500">
+              {error instanceof Error
+                ? error.message
+                : "Something went wrong while loading mentors."}
+            </p>
           </div>
         ) : mentors.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
@@ -190,6 +242,7 @@ const DiscoverMentorsPage = () => {
           </div>
         ) : (
           <>
+            {/* Result count */}
             <div className="mb-5 flex items-center justify-between">
               <p className="text-sm text-gray-500">
                 Showing{" "}
@@ -200,12 +253,14 @@ const DiscoverMentorsPage = () => {
               </p>
             </div>
 
+            {/* Mentor cards */}
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {mentors.map((mentor) => (
-                <MentorCard key={mentor.auth_user_id} mentor={mentor} />
+                <MentorCard key={mentor.id} mentor={mentor} />
               ))}
             </div>
 
+            {/* Load More */}
             {hasNextPage && (
               <div className="mt-8 flex justify-center">
                 <button
