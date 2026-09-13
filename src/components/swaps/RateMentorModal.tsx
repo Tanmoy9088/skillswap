@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { Star, X } from "lucide-react";
 
-import { useCreateSwapRating } from "@/hooks/skills/useCreateSwapRating";
+import { useCreateSwapRating } from "@/hooks/mentors/skills/useCreateSwapRating";
+import { useUpdateSwapRating } from "@/hooks/mentors/skills/useUpdateSwapRating";
+import { SwapRating } from "@/hooks/mentors/skills/useSwapRating";
 
 interface RateMentorModalProps {
   swapId: string;
   mentorName: string;
   skillName: string;
+  existingRating?: SwapRating | null;
   onClose: () => void;
 }
 
@@ -16,17 +19,23 @@ const RateMentorModal = ({
   swapId,
   mentorName,
   skillName,
+  existingRating,
   onClose,
 }: RateMentorModalProps) => {
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(existingRating?.rating ?? 0);
+
   const [hoverRating, setHoverRating] = useState(0);
-  const [review, setReview] = useState("");
+
+  const [review, setReview] = useState(existingRating?.review ?? "");
 
   const createRating = useCreateSwapRating();
+  const updateRating = useUpdateSwapRating();
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const isEditing = Boolean(existingRating);
+
+  const isPending = createRating.isPending || updateRating.isPending;
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (rating === 0) {
@@ -35,22 +44,48 @@ const RateMentorModal = ({
     }
 
     try {
-      await createRating.mutateAsync({
-        swapId,
-        rating,
-        review: review.trim() || undefined,
-      });
+      if (isEditing) {
+        await updateRating.mutateAsync({
+          swapId,
+          rating,
+          review: review.trim() || undefined,
+        });
 
-      alert("Rating submitted successfully!");
+        alert("Rating updated successfully!");
+      } else {
+        await createRating.mutateAsync({
+          swapId,
+          rating,
+          review: review.trim() || undefined,
+        });
+
+        alert("Rating submitted successfully!");
+      }
+
       onClose();
     } catch (error) {
       alert(
         error instanceof Error
           ? error.message
-          : "Failed to submit rating."
+          : isEditing
+            ? "Failed to update rating."
+            : "Failed to submit rating.",
       );
     }
   };
+
+  const ratingLabel =
+    rating === 1
+      ? "Poor"
+      : rating === 2
+        ? "Fair"
+        : rating === 3
+          ? "Good"
+          : rating === 4
+            ? "Very Good"
+            : rating === 5
+              ? "Excellent"
+              : "";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -59,7 +94,7 @@ const RateMentorModal = ({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">
-              Rate Your Mentor
+              {isEditing ? "Edit Your Rating" : "Rate Your Mentor"}
             </h2>
 
             <p className="mt-1 text-sm text-gray-500">
@@ -70,17 +105,17 @@ const RateMentorModal = ({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+            disabled={isPending}
+            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-6"
-        >
-          {/* Stars */}
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="mt-6">
+          {/* Rating */}
           <div>
             <p className="text-sm font-semibold text-gray-700">
               How was your session?
@@ -88,27 +123,18 @@ const RateMentorModal = ({
 
             <div className="mt-3 flex gap-2">
               {[1, 2, 3, 4, 5].map((star) => {
-                const active =
-                  star <=
-                  (hoverRating || rating);
+                const active = star <= (hoverRating || rating);
 
                 return (
                   <button
                     key={star}
                     type="button"
-                    onMouseEnter={() =>
-                      setHoverRating(star)
-                    }
-                    onMouseLeave={() =>
-                      setHoverRating(0)
-                    }
-                    onClick={() =>
-                      setRating(star)
-                    }
-                    className="rounded-lg p-1 transition hover:scale-110"
-                    aria-label={`${star} star${
-                      star > 1 ? "s" : ""
-                    }`}
+                    disabled={isPending}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => setRating(star)}
+                    className="rounded-lg p-1 transition hover:scale-110 disabled:cursor-not-allowed"
+                    aria-label={`${star} star${star > 1 ? "s" : ""}`}
                   >
                     <Star
                       className={`h-8 w-8 ${
@@ -123,12 +149,8 @@ const RateMentorModal = ({
             </div>
 
             {rating > 0 && (
-              <p className="mt-2 text-sm text-gray-500">
-                {rating === 1 && "Poor"}
-                {rating === 2 && "Fair"}
-                {rating === 3 && "Good"}
-                {rating === 4 && "Very Good"}
-                {rating === 5 && "Excellent"}
+              <p className="mt-2 text-sm font-medium text-gray-600">
+                {ratingLabel}
               </p>
             )}
           </div>
@@ -140,21 +162,18 @@ const RateMentorModal = ({
               className="text-sm font-semibold text-gray-700"
             >
               Review{" "}
-              <span className="font-normal text-gray-400">
-                (optional)
-              </span>
+              <span className="font-normal text-gray-400">(optional)</span>
             </label>
 
             <textarea
               id="review"
               value={review}
-              onChange={(event) =>
-                setReview(event.target.value)
-              }
-              placeholder="Share your experience..."
-              rows={4}
+              onChange={(event) => setReview(event.target.value)}
               maxLength={1000}
-              className="mt-2 w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+              rows={5}
+              disabled={isPending}
+              placeholder="Share your experience with this mentor..."
+              className="mt-2 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 disabled:cursor-not-allowed disabled:bg-gray-100"
             />
 
             <p className="mt-1 text-right text-xs text-gray-400">
@@ -162,28 +181,29 @@ const RateMentorModal = ({
             </p>
           </div>
 
-          {/* Actions */}
+          {/* Buttons */}
           <div className="mt-6 flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              disabled={createRating.isPending}
-              className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
+              disabled={isPending}
+              className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              disabled={
-                rating === 0 ||
-                createRating.isPending
-              }
+              disabled={rating === 0 || isPending}
               className="flex-1 rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {createRating.isPending
-                ? "Submitting..."
-                : "Submit Rating"}
+              {isPending
+                ? isEditing
+                  ? "Updating..."
+                  : "Submitting..."
+                : isEditing
+                  ? "Save Changes"
+                  : "Submit Rating"}
             </button>
           </div>
         </form>
