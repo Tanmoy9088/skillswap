@@ -8,9 +8,9 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useAddSkill } from "@/hooks/mentors/skills/useAddSkills";
+import { useAddSkill } from "@/hooks/skills/useAddSkills";
 import { useGlobalStore } from "@/store/globalState";
-import { useAvailableSkills } from "@/hooks/mentors/skills/useAvailableSkills";
+import { useAvailableSkills } from "@/hooks/skills/useAvailableSkills";
 
 /*
 ============================================================

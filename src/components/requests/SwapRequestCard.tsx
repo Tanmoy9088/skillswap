@@ -1,13 +1,15 @@
 "use client";
 
 import Image from "next/image";
-
 import { Check, Clock, Coins, X } from "lucide-react";
 
 import type { SwapRequest } from "@/types/types/swaps";
 
 import { useUpdateSwapRequest } from "@/hooks/skills/useUpdateSwapRequest";
 import { useAcceptSwapRequest } from "@/hooks/skills/useAcceptSwapRequest";
+
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
 
 interface SwapRequestCardProps {
   request: SwapRequest;
@@ -17,19 +19,46 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
   const updateRequest = useUpdateSwapRequest();
   const acceptRequest = useAcceptSwapRequest();
 
-  const handleStatusUpdate = async (status: "accepted" | "rejected") => {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const supabase = createClient();
+
+  // Get currently logged-in user's auth ID
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      setCurrentUserId(user?.id ?? null);
+    };
+
+    getCurrentUser();
+  }, [supabase]);
+
+  const isRequester = currentUserId === request.requester_auth_user_id;
+
+  const isMentor = currentUserId === request.mentor_auth_user_id;
+
+  const handleReject = async () => {
     try {
       await updateRequest.mutateAsync({
         requestId: request.id,
-        status,
+        status: isRequester ? "cancelled" : "rejected",
       });
-      alert("Swap accepted and tokens transferred successfully.");
+
+      alert(
+        isRequester
+          ? "Swap request cancelled successfully."
+          : "Swap request rejected successfully.",
+      );
     } catch (error) {
       alert(
         error instanceof Error ? error.message : "Failed to update request.",
       );
     }
   };
+
   const handleAccept = async () => {
     try {
       await acceptRequest.mutateAsync(request.id);
@@ -43,7 +72,7 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
   return (
     <article className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-5 md:flex-row md:items-center">
-        {/* User */}
+        {/* Requester */}
         <div className="flex flex-1 items-center gap-4">
           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-gray-100">
             <Image
@@ -51,6 +80,7 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
               alt={request.requester_name}
               fill
               className="object-cover"
+              unoptimized
             />
           </div>
 
@@ -93,7 +123,7 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
       {request.message && (
         <div className="mt-5 rounded-xl bg-[#F7F7FF] p-4">
           <p className="text-sm leading-6 text-[#53617A]">
-            &quot{request.message}&quot
+            &quot;{request.message}&quot;
           </p>
         </div>
       )}
@@ -111,28 +141,50 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
       </div>
 
       {/* Actions */}
-      {request.status === "pending" && (
+      {request.status === "pending" && currentUserId && (
         <div className="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-5">
-          <button
-            type="button"
-            disabled={updateRequest.isPending}
-            onClick={() => handleStatusUpdate("rejected")}
-            className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-          >
-            <X size={16} />
-            Reject
-          </button>
+          {/* Requester:
+              Only show Reject/Cancel */}
+          {isRequester && (
+            <button
+              type="button"
+              disabled={updateRequest.isPending}
+              onClick={handleReject}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <X size={16} />
 
-          <button
-            type="button"
-            disabled={acceptRequest.isPending}
-            onClick={handleAccept}
-            className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Check size={16} />
+              {updateRequest.isPending ? "Cancelling..." : "Reject"}
+            </button>
+          )}
 
-            {acceptRequest.isPending ? "Accepting..." : "Accept"}
-          </button>
+          {/* Mentor:
+              Show Reject + Accept */}
+          {isMentor && (
+            <>
+              <button
+                type="button"
+                disabled={updateRequest.isPending}
+                onClick={handleReject}
+                className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <X size={16} />
+
+                {updateRequest.isPending ? "Rejecting..." : "Reject"}
+              </button>
+
+              <button
+                type="button"
+                disabled={acceptRequest.isPending}
+                onClick={handleAccept}
+                className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Check size={16} />
+
+                {acceptRequest.isPending ? "Accepting..." : "Accept"}
+              </button>
+            </>
+          )}
         </div>
       )}
     </article>
