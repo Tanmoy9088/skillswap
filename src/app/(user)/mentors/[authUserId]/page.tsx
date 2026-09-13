@@ -1,89 +1,114 @@
-"use client";
+import type { Metadata } from "next";
 
-import { useParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
-import { useMentorProfile } from "@/hooks/skills/useMentorProfile";
-import MentorProfile from "@/components/mentors/MentorProfile";
+import MentorProfileClient from "./MentorProfileClient";
+
+interface MentorProfilePageProps {
+  params: Promise<{
+    authUserId: string;
+  }>;
+}
+
+interface MentorProfileData {
+  profile?: {
+    name?: string | null;
+    bio?: string | null;
+    profile_img?: string | null;
+  };
+
+  skills?: Array<{
+    skill_name?: string | null;
+  }>;
+}
+
+async function getMentorForSeo(
+  authUserId: string,
+): Promise<MentorProfileData | null> {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase.rpc("get_mentor_profile", {
+      p_auth_user_id: authUserId,
+    });
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data as MentorProfileData;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: MentorProfilePageProps): Promise<Metadata> {
+  const { authUserId } = await params;
+
+  const mentorId = decodeURIComponent(authUserId);
+
+  const data = await getMentorForSeo(mentorId);
+
+  const mentorName = data?.profile?.name?.trim();
+
+  const skillNames = Array.from(
+    new Set(
+      (data?.skills ?? [])
+        .map((skill) => skill.skill_name?.trim())
+        .filter((skill): skill is string => Boolean(skill)),
+    ),
+  );
+
+  const skillText = skillNames.slice(0, 3).join(" & ");
+
+  const title = mentorName
+    ? skillText
+      ? `${mentorName} – ${skillText} Mentor`
+      : `${mentorName} – Mentor`
+    : "Mentor Profile";
+
+  const description = mentorName
+    ? skillText
+      ? `Learn ${skillText} from ${mentorName} on SkillSwap+. Explore their skills, expertise, ratings, reviews, and available learning sessions.`
+      : `Learn from ${mentorName} on SkillSwap+. Explore their skills, expertise, ratings, reviews, and available learning sessions.`
+    : "Discover mentors, skills, ratings, reviews, and learning sessions on SkillSwap+.";
+
+  return {
+    title,
+    description,
+
+    alternates: {
+      canonical: `/mentors/${encodeURIComponent(mentorId)}`,
+    },
+
+    openGraph: {
+      type: "profile",
+      title: `${title} | SkillSwap+`,
+      description,
+      url: `/mentors/${encodeURIComponent(mentorId)}`,
+      images: [
+        {
+          url: data?.profile?.profile_img || "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: mentorName
+            ? `${mentorName} – SkillSwap+ Mentor`
+            : "SkillSwap+ Mentor Profile",
+        },
+      ],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | SkillSwap+`,
+      description,
+      images: [data?.profile?.profile_img || "/og-image.png"],
+    },
+  };
+}
 
 export default function MentorProfilePage() {
-  const params = useParams<{ authUserId: string }>();
-
-  const authUserId = params.authUserId
-    ? decodeURIComponent(params.authUserId)
-    : "";
-
-  const { data, isPending, isError, error } = useMentorProfile(authUserId);
-
-  // Loading
-  if (isPending) {
-    return (
-      <main className="min-h-screen bg-[#F7F7FF] px-6 py-20">
-        <div className="mx-auto max-w-7xl animate-pulse">
-          <div className="h-5 w-32 rounded bg-gray-200" />
-
-          <div className="mt-10 flex items-center gap-6">
-            <div className="h-28 w-28 rounded-full bg-gray-200" />
-
-            <div>
-              <div className="h-10 w-64 rounded bg-gray-200" />
-
-              <div className="mt-4 h-5 w-96 rounded bg-gray-200" />
-            </div>
-          </div>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="h-56 rounded-2xl bg-gray-200" />
-            ))}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  // Error
-  if (isError) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F7F7FF] px-6">
-        <div className="max-w-lg rounded-2xl bg-white p-8 text-center shadow-sm">
-          <h1 className="text-xl font-bold text-red-600">
-            Failed to load mentor
-          </h1>
-
-          <p className="mt-3 text-sm text-gray-500">
-            {error instanceof Error
-              ? error.message
-              : "Something went wrong while loading this mentor."}
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  // Mentor not found
-  if (!data?.profile) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F7F7FF] px-6">
-        <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-          <h1 className="text-2xl font-bold text-[#17366F]">
-            Mentor not found
-          </h1>
-
-          <p className="mt-2 text-gray-500">
-            This mentor profile doesn&apos;t exist.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  // Success
-  return (
-    <MentorProfile
-      profile={data.profile}
-      skills={data.skills}
-      rating={data.rating}
-      reviews={data.reviews}
-    />
-  );
+  return <MentorProfileClient />;
 }
