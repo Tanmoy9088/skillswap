@@ -1,19 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-
 import { Loader2 } from "lucide-react";
-
 import { getMentorAvailability } from "@/lib/mentorAvailability";
 import { useProposeSwapReschedule } from "@/hooks/skills/useProposeSwapReschedule";
-
 import RescheduleSessionForm from "./ReScheduleSessionForm";
 import RescheduleSessionHeader from "./ReScheduleSessionHeader";
 import RescheduleSessionReview from "./ReScheduleSessionReview";
-
 import {
   DAYS,
-  createLocalDate,
   formatTime,
   getToday,
   isTimeWithinAvailability,
@@ -38,15 +33,11 @@ const RescheduleSessionModal = ({
   const proposeReschedule = useProposeSwapReschedule();
 
   const [step, setStep] = useState<Step>("select");
-
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [note, setNote] = useState("");
-
   const [availability, setAvailability] = useState<Availability[]>([]);
-
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(true);
-
   const [availabilityError, setAvailabilityError] = useState<string | null>(
     null,
   );
@@ -95,8 +86,7 @@ const RescheduleSessionModal = ({
       return [];
     }
 
-    const selectedDate = createLocalDate(date, "00:00");
-
+    const selectedDate = new Date(`${date}T00:00:00+05:30`);
     const dayOfWeek = selectedDate.getDay();
 
     return availability.filter(
@@ -110,7 +100,7 @@ const RescheduleSessionModal = ({
     }
 
     if (selectedAvailability.length === 0) {
-      const selectedDate = createLocalDate(date, "00:00");
+      const selectedDate = new Date(`${date}T00:00:00+05:30`);
 
       return `Mentor is not available on ${DAYS[selectedDate.getDay()]}.`;
     }
@@ -122,6 +112,16 @@ const RescheduleSessionModal = ({
       )
       .join(", ");
   }, [date, selectedAvailability]);
+
+  const createProposedAt = () => {
+    if (!date || !time) {
+      return null;
+    }
+
+    const proposedAt = new Date(`${date}T${time}:00+05:30`);
+
+    return Number.isNaN(proposedAt.getTime()) ? null : proposedAt;
+  };
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = event.target.value;
@@ -168,13 +168,12 @@ const RescheduleSessionModal = ({
       alert(
         `Please choose a time within the mentor's availability: ${availabilityText}`,
       );
-
       return;
     }
 
-    const proposedAt = createLocalDate(date, time);
+    const proposedAt = createProposedAt();
 
-    if (Number.isNaN(proposedAt.getTime())) {
+    if (!proposedAt) {
       alert("Invalid date or time.");
       return;
     }
@@ -196,9 +195,9 @@ const RescheduleSessionModal = ({
       return;
     }
 
-    const proposedAt = createLocalDate(date, time);
+    const proposedAt = createProposedAt();
 
-    if (Number.isNaN(proposedAt.getTime())) {
+    if (!proposedAt) {
       alert("Invalid date or time.");
       return;
     }
@@ -209,7 +208,6 @@ const RescheduleSessionModal = ({
       );
 
       setStep("select");
-
       return;
     }
 
@@ -217,7 +215,6 @@ const RescheduleSessionModal = ({
       alert("Please choose a future date and time.");
 
       setStep("select");
-
       return;
     }
 
@@ -229,7 +226,6 @@ const RescheduleSessionModal = ({
       });
 
       alert("New session time proposed successfully.");
-
       onClose();
     } catch (error) {
       alert(
@@ -245,7 +241,7 @@ const RescheduleSessionModal = ({
       return "";
     }
 
-    return createLocalDate(date, "00:00").toLocaleDateString(undefined, {
+    return new Date(`${date}T00:00:00+05:30`).toLocaleDateString(undefined, {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -274,7 +270,6 @@ const RescheduleSessionModal = ({
         {isLoadingAvailability && (
           <div className="mt-6 flex items-center gap-3 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
             <Loader2 className="h-4 w-4 animate-spin" />
-
             <span>Loading your availability...</span>
           </div>
         )}

@@ -1,22 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { X, Send, Loader2 } from "lucide-react";
-
 import { useGlobalStore } from "@/store/globalState";
 import { useCreateSwapRequest } from "@/hooks/skills/useCreateSwapRequest";
-
 import type { MentorSkill } from "@/types/types/skills";
-
-interface SwapRequestForm {
-  skillId: string;
-  message: string;
-}
 
 interface SwapRequestModalProps {
   mentorAuthUserId: string;
   skills: MentorSkill[];
+}
+
+interface SwapRequestForm {
+  skillId: string;
+  message: string;
 }
 
 export default function SwapRequestModal({
@@ -24,22 +22,17 @@ export default function SwapRequestModal({
   skills,
 }: SwapRequestModalProps) {
   const isOpen = useGlobalStore((state) => state.isSwapRequestOpen);
-
   const selectedSkillId = useGlobalStore((state) => state.selectedSwapSkillId);
-
   const closeSwapRequest = useGlobalStore((state) => state.closeSwapRequest);
-
   const setSelectedSwapSkillId = useGlobalStore(
     (state) => state.setSelectedSwapSkillId,
   );
 
   const createRequest = useCreateSwapRequest();
 
-  /**
-   * Only skills offered by this mentor.
-   */
-  const offeredSkills = skills.filter(
-    (skill) => skill.skill_type === "offered",
+  const offeredSkills = useMemo(
+    () => skills.filter((skill) => skill.skill_type === "offered"),
+    [skills],
   );
 
   const {
@@ -49,47 +42,66 @@ export default function SwapRequestModal({
     formState: { errors },
   } = useForm<SwapRequestForm>({
     defaultValues: {
-      skillId: selectedSkillId ?? "",
+      skillId: "",
       message: "",
     },
   });
 
-  /**
-   * Reset form whenever:
-   *
-   * - modal opens
-   * - selected skill changes
-   */
   useEffect(() => {
     if (!isOpen) {
       return;
     }
 
+    const selectedSkillIsAvailable =
+      selectedSkillId !== null &&
+      offeredSkills.some((skill) => skill.id === selectedSkillId);
+
+    const initialSkillId = selectedSkillIsAvailable ? selectedSkillId : "";
+
     reset({
-      skillId: selectedSkillId ?? offeredSkills[0]?.id ?? "",
+      skillId: initialSkillId,
       message: "",
     });
   }, [isOpen, selectedSkillId, offeredSkills, reset]);
 
-  if (!isOpen) {
-    return null;
-  }
+  const handleClose = () => {
+    reset({
+      skillId: "",
+      message: "",
+    });
+
+    setSelectedSwapSkillId("");
+    closeSwapRequest();
+  };
 
   const onSubmit = async (values: SwapRequestForm) => {
+    const selectedSkill = offeredSkills.find(
+      (skill) => skill.id === values.skillId,
+    );
+
+    if (!selectedSkill) {
+      alert("Please select a valid skill.");
+      return;
+    }
+
     try {
       await createRequest.mutateAsync({
         mentorAuthUserId,
-        skillId: values.skillId,
+        skillId: selectedSkill.id,
         message: values.message,
       });
 
-      reset();
+      reset({
+        skillId: "",
+        message: "",
+      });
 
+      setSelectedSwapSkillId("");
       closeSwapRequest();
 
-      alert("Swap request sent successfully!");
+      alert(`${selectedSkill.skill_name} swap request sent successfully!`);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to send swap request:", error);
 
       alert(
         error instanceof Error ? error.message : "Failed to send swap request.",
@@ -97,89 +109,74 @@ export default function SwapRequestModal({
     }
   };
 
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
-          closeSwapRequest();
+          handleClose();
         }
       }}
     >
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
-        {/* Header */}
+      <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
           <div>
             <h2 className="text-xl font-bold text-[#17366F]">Request a Swap</h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Send a learning request to this mentor.
+            <p className="mt-1 text-sm text-[#53617A]">
+              Select the skill you want to learn from this mentor.
             </p>
           </div>
 
           <button
             type="button"
-            onClick={closeSwapRequest}
-            className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
+            onClick={handleClose}
+            className="rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+            aria-label="Close modal"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-6">
-          {/* Skill */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 px-6 py-6">
           <div>
             <label
               htmlFor="swap-skill"
               className="mb-2 block text-sm font-semibold text-[#17366F]"
             >
-              Choose a skill
+              Skill
             </label>
 
-            {offeredSkills.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-500">
-                This mentor has no offered skills available.
-              </div>
-            ) : (
-              <select
-                id="swap-skill"
-                {...register("skillId", {
-                  required: "Please select a skill.",
-                  onChange: (event) => {
-                    setSelectedSwapSkillId(event.target.value);
-                  },
-                })}
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              >
-                <option value="">Select a skill</option>
+            <select
+              id="swap-skill"
+              {...register("skillId", {
+                required: "Please select a skill.",
+                onChange: (event) => {
+                  setSelectedSwapSkillId(event.target.value || null);
+                },
+              })}
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            >
+              <option value="">Select a skill</option>
 
-                {offeredSkills.map((skill) => {
-                  const skillName =
-                    skill.skill_name || skill.skills?.name || "Unknown Skill";
-
-                  return (
-                    <option key={skill.id} value={skill.id}>
-                      {skillName}
-                    </option>
-                  );
-                })}
-              </select>
-            )}
+              {offeredSkills.map((skill) => (
+                <option key={skill.id} value={skill.id}>
+                  {skill.skill_name}
+                </option>
+              ))}
+            </select>
 
             {errors.skillId && (
-              <p className="mt-1 text-xs text-red-500">
+              <p className="mt-2 text-sm text-red-500">
                 {errors.skillId.message}
               </p>
             )}
-
-            <p className="mt-2 text-xs text-gray-400">
-              Session duration and token cost will be selected later from the
-              mentor&apos;s available session options.
-            </p>
           </div>
 
-          {/* Message */}
           <div>
             <label
               htmlFor="swap-message"
@@ -191,30 +188,29 @@ export default function SwapRequestModal({
             <textarea
               id="swap-message"
               rows={5}
-              placeholder="Tell the mentor what you'd like to learn..."
+              placeholder="Write a message to the mentor..."
               {...register("message", {
                 maxLength: {
-                  value: 1000,
-                  message: "Message cannot exceed 1000 characters.",
+                  value: 500,
+                  message: "Message cannot exceed 500 characters.",
                 },
               })}
-              className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 outline-none transition placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
             />
 
             {errors.message && (
-              <p className="mt-1 text-xs text-red-500">
+              <p className="mt-2 text-sm text-red-500">
                 {errors.message.message}
               </p>
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3">
+          <div className="flex gap-3 pt-2">
             <button
               type="button"
-              onClick={closeSwapRequest}
+              onClick={handleClose}
               disabled={createRequest.isPending}
-              className="rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
+              className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
@@ -222,19 +218,9 @@ export default function SwapRequestModal({
             <button
               type="submit"
               disabled={createRequest.isPending || offeredSkills.length === 0}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {createRequest.isPending ? (
-                <>
-                  <Loader2 size={17} className="animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send size={17} />
-                  Send Request
-                </>
-              )}
+              {createRequest.isPending ? "Sending..." : "Send Request"}
             </button>
           </div>
         </form>
