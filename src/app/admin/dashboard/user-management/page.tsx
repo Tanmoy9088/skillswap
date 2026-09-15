@@ -10,12 +10,9 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  // CircleAlert,
   Filter,
   RotateCcw,
-  // Search,
   ShieldCheck,
-  // SlidersHorizontal,
   Star,
 } from "lucide-react";
 import Image from "next/image";
@@ -23,6 +20,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 
 const UserManagement = () => {
+  
   const pageSize = 3;
 
   const page = useUserPagination((state) => state.page);
@@ -35,7 +33,6 @@ const UserManagement = () => {
     isLoading,
     error: Error,
   } = useUsers(page, pageSize);
-
   const [activeTab, setActiveTab] = useState("All Users");
 
   return (
