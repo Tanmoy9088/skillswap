@@ -108,7 +108,8 @@ export default function SwapDetailsPage() {
                     src={swap.learner_profile_img}
                     alt={swap.learner_name}
                     className="h-12 w-12 rounded-full object-cover"
-                    fill
+                    height={80}
+                    width={80}
                   />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
@@ -138,7 +139,8 @@ export default function SwapDetailsPage() {
                     src={swap.mentor_profile_img}
                     alt={swap.mentor_name}
                     className="h-12 w-12 rounded-full object-cover"
-                    fill
+                    height={80}
+                    width={80}
                   />
                 ) : (
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
