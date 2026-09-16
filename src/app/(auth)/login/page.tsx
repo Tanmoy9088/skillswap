@@ -32,6 +32,7 @@ const LoginPage = () => {
   });
 
   const onSubmit = (data: LoginPayload) => {
+    console.log("LOGIN SUBMIT FIRED");
     mutate(data, {
       onSuccess: async (response) => {
         const userId = response?.user?.id;
@@ -39,12 +40,11 @@ const LoginPage = () => {
         if (!userId) return;
 
         const profile = await getCurrentProfile();
+        toast.success("Login successful");
 
         if (profile?.role === "admin") {
-          toast.success("Login successful");
           router.push("/admin/dashboard");
         } else {
-          toast.success("Login successful");
           router.push("/");
         }
         reset();

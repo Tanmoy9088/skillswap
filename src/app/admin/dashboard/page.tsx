@@ -1,473 +1,748 @@
 "use client";
-import { useAdminPlatformStats } from "@/hooks/admin/useAdminPlatformStats";
-import {
-  Activity,
-  BarChart3,
-  // Bot,
-  Check,
-  Rocket,
-  TrendingUp,
-  UserPlus,
-  Users,
-  Zap,
-} from "lucide-react";
 
+import { useMemo } from "react";
+import { Activity, ArrowUpRight, CheckCircle2, Users, Zap } from "lucide-react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Line,
   LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 
-const userGrowthData = [
-  { week: "W1", users: 1200 },
-  { week: "W2", users: 1850 },
-  { week: "W3", users: 2300 },
-  { week: "W4", users: 2491 },
-];
+import { useAdminPlatformStats } from "@/hooks/admin/useAdminPlatformStats";
+import { useAdminAnalytics } from "@/hooks/admin/useAdminAnalytics";
 
-const sessionData = [
-  { day: "1", sessions: 200 },
-  { day: "2", sessions: 300 },
-  { day: "3", sessions: 250 },
-  { day: "4", sessions: 450 },
-];
-
-const trendingSkills = [
-  {
-    name: "Rust Lang",
-    percentage: "42%",
-    icon: "⌘",
-  },
-  {
-    name: "GenAI Ops",
-    percentage: "28%",
-    icon: "✦",
-  },
-  {
-    name: "UX Writing",
-    percentage: "15%",
-    icon: "✎",
-  },
-  {
-    name: "Algo-Trading",
-    percentage: "12%",
-    icon: "▥",
-  },
-];
-
-const Dashboard = () => {
+const DashboardPage = () => {
   const {
     data: platformStats,
     isLoading: isStatsLoading,
     isError: isStatsError,
   } = useAdminPlatformStats();
-  return (
-    <div className="min-h-screen bg-[#FAF8FF] p-8">
-      {/* ================= HEADER ================= */}
 
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-[#253858]">Platform Pulse</h1>
+  const {
+    users,
+    sessions,
 
-          <p className="mt-1 text-gray-500">
-            Real-time overview of SkillSwap+ ecosystem performance.
-          </p>
-        </div>
+    isLoading: isAnalyticsLoading,
+    isError: isAnalyticsError,
+  } = useAdminAnalytics();
 
-        <div className="flex items-center gap-2 rounded-full bg-white px-5 py-2 shadow-sm">
-          <span className="h-2 w-2 rounded-full bg-green-500" />
+  const isLoading = isStatsLoading || isAnalyticsLoading;
+  const isError = isStatsError || isAnalyticsError;
 
-          <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
-            Live System Status: Optimal
-          </span>
+  const userGrowthData = useMemo(() => {
+    const now = new Date();
+    const weeks = Array.from({ length: 6 }, (_, index) => {
+      const start = new Date(now);
+      start.setDate(now.getDate() - (5 - index) * 7 - now.getDay());
+
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+
+      return {
+        label: `W${index + 1}`,
+        start,
+        end,
+      };
+    });
+
+    return weeks.map((week) => ({
+      name: week.label,
+      users: users.filter((user) => {
+        const createdAt = new Date(user.created_at);
+        return createdAt >= week.start && createdAt <= week.end;
+      }).length,
+    }));
+  }, [users]);
+
+  const sessionActivityData = useMemo(() => {
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() - (6 - index));
+
+      return date;
+    });
+
+    return days.map((date) => {
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      return {
+        name: date.toLocaleDateString("en-US", {
+          weekday: "short",
+        }),
+        sessions: sessions.filter((session) => {
+          const createdAt = new Date(session.created_at);
+          return createdAt >= date && createdAt < nextDate;
+        }).length,
+      };
+    });
+  }, [sessions]);
+
+  const sessionStatusData = useMemo(() => {
+    const completed = sessions.filter(
+      (session) => session.status === "completed",
+    ).length;
+
+    const scheduled = sessions.filter(
+      (session) => session.status === "scheduled",
+    ).length;
+
+    const accepted = sessions.filter(
+      (session) => session.status === "accepted",
+    ).length;
+
+    const inProgress = sessions.filter(
+      (session) => session.status === "in_progress",
+    ).length;
+
+    const cancelled = sessions.filter(
+      (session) => session.status === "cancelled",
+    ).length;
+
+    return [
+      {
+        name: "Completed",
+        value: completed,
+      },
+      {
+        name: "Scheduled",
+        value: scheduled,
+      },
+      {
+        name: "Accepted",
+        value: accepted,
+      },
+      {
+        name: "In Progress",
+        value: inProgress,
+      },
+      {
+        name: "Cancelled",
+        value: cancelled,
+      },
+    ];
+  }, [sessions]);
+
+  const popularSkills = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    sessions.forEach((session) => {
+      const skillName = session.skill_name?.trim();
+
+      if (!skillName) {
+        return;
+      }
+
+      counts.set(skillName, (counts.get(skillName) ?? 0) + 1);
+    });
+
+    return Array.from(counts.entries())
+      .sort(([, first], [, second]) => second - first)
+      .slice(0, 5)
+      .map(([name, count]) => ({
+        name,
+        sessions: count,
+      }));
+  }, [sessions]);
+
+  const completedSessions = useMemo(
+    () => sessions.filter((session) => session.status === "completed").length,
+    [sessions],
+  );
+
+  const cancelledSessions = useMemo(
+    () => sessions.filter((session) => session.status === "cancelled").length,
+    [sessions],
+  );
+
+  const activeSessions = useMemo(
+    () =>
+      sessions.filter(
+        (session) =>
+          session.status === "accepted" ||
+          session.status === "scheduled" ||
+          session.status === "in_progress",
+      ).length,
+    [sessions],
+  );
+
+  const totalSessions = sessions.length;
+
+  const sessionOverview = useMemo(
+    () => [
+      {
+        title: "Total",
+        value: totalSessions,
+        icon: Activity,
+        description: "All requests and sessions",
+      },
+      {
+        title: "Completed",
+        value: completedSessions,
+        icon: CheckCircle2,
+        description: "Finished sessions",
+      },
+    ],
+    [totalSessions, completedSessions],
+  );
+
+  const recentSessions = useMemo(
+    () =>
+      [...sessions]
+        .sort(
+          (first, second) =>
+            new Date(second.created_at).getTime() -
+            new Date(first.created_at).getTime(),
+        )
+        .slice(0, 6),
+    [sessions],
+  );
+
+  const statusColors = [
+    "hsl(142 71% 45%)",
+    "hsl(217 91% 60%)",
+    "hsl(38 92% 50%)",
+    "hsl(271 91% 65%)",
+    "hsl(0 84% 60%)",
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="h-8 w-64 animate-pulse rounded-lg bg-gray-200" />
+          <div className="mt-2 h-5 w-96 animate-pulse rounded-lg bg-gray-200" />
+
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-32 animate-pulse rounded-2xl bg-white shadow-sm"
+              />
+            ))}
+          </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <div className="h-96 animate-pulse rounded-2xl bg-white shadow-sm" />
+            <div className="h-96 animate-pulse rounded-2xl bg-white shadow-sm" />
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* ================= TOP GRID ================= */}
-
-      <div className="grid grid-cols-12 gap-7">
-        {/* LEFT STATS */}
-
-        <div className="col-span-3 flex flex-col gap-6">
-          {/* Stickiness */}
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-start justify-between">
-              <div className="rounded-xl bg-[#E2DFFF] p-3">
-                <BarChart3 size={20} className="text-[#4F46E5]" />
-              </div>
-
-              <span className="rounded bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
-                +12.4%
-              </span>
-            </div>
-
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
-              Stickiness
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold text-[#253858]">42.8%</h2>
-
-            <div className="mt-5 h-1 w-full rounded bg-gray-200">
-              <div className="h-full w-[43%] rounded bg-[#4F46E5]" />
-            </div>
-          </div>
-
-          {/* Total Sessions */}
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-start justify-between">
-              <div className="rounded-xl bg-[#E2DFFF] p-3">
-                <Rocket size={20} className="text-[#4F46E5]" />
-              </div>
-
-              <span className="rounded bg-green-50 px-2 py-1 text-xs font-semibold text-green-600">
-                +8.2%
-              </span>
-            </div>
-
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
-              Total Sessions
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold text-[#253858]">
-              {isStatsLoading
-                ? "..."
-                : isStatsError
-                  ? "—"
-                  : platformStats?.total_sessions.toLocaleString()}
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+            <h2 className="text-lg font-semibold text-red-700">
+              Unable to load dashboard data
             </h2>
-
-            <div className="mt-5 h-20">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sessionData}>
-                  <Bar
-                    dataKey="sessions"
-                    fill="#4F46E5"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Active Mentors */}
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-start justify-between">
-              <div className="rounded-xl bg-[#E2DFFF] p-3">
-                <Users size={20} className="text-[#4F46E5]" />
-              </div>
-
-              <span className="rounded bg-red-50 px-2 py-1 text-xs font-semibold text-red-500">
-                -2.1%
-              </span>
-            </div>
-
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
-              Active Mentors
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold text-[#253858]">
-              {isStatsLoading
-                ? "..."
-                : isStatsError
-                  ? "—"
-                  : platformStats?.active_mentors.toLocaleString()}
-            </h2>
-
-            <p className="mt-3 text-xs italic text-gray-400">
-              Peak hours starting in 2h
-            </p>
-          </div>
-          {/* Total Users */}
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-start justify-between">
-              <div className="rounded-xl bg-[#E2DFFF] p-3">
-                <UserPlus size={20} className="text-[#4F46E5]" />
-              </div>
-            </div>
-
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
-              Total Users
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold text-[#253858]">
-              {isStatsLoading
-                ? "..."
-                : isStatsError
-                  ? "—"
-                  : platformStats?.total_users.toLocaleString()}
-            </h2>
-
-            <p className="mt-3 text-xs italic text-gray-400">
-              Registered learners and mentors
+            <p className="mt-1 text-sm text-red-600">
+              Please refresh the page and try again.
             </p>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        {/* CENTER CHART */}
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              Admin Dashboard
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Real-time overview of SkillSwap+ platform activity
+            </p>
+          </div>
 
-        <div className="col-span-6">
-          <div className="h-full min-h-183.75 rounded-2xl bg-white p-7 shadow-sm">
+          <div className="flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-sm font-medium text-green-700">
+            <span className="h-2 w-2 rounded-full bg-green-500" />
+            Live Data
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold text-[#253858]">
-                  User Base Evolution
-                </h2>
-
-                <p className="text-sm text-gray-500">
-                  Growth trajectory over the last 30 days
+                <p className="text-sm font-medium text-gray-500">Total Users</p>
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {platformStats?.total_users ?? users.length}
                 </p>
               </div>
 
-              <div className="flex gap-2">
-                <button className="rounded-lg bg-[#EEF0F8] px-4 py-2 text-sm">
-                  Weekly
-                </button>
-
-                <button className="rounded-lg bg-[#4F46E5] px-4 py-2 text-sm text-white">
-                  Monthly
-                </button>
+              <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
+                <Users size={22} />
               </div>
             </div>
 
-            <div className="my-8 h-px bg-gray-100" />
+            <div className="mt-4 flex items-center gap-1 text-xs text-gray-500">
+              <ArrowUpRight size={14} />
+              Registered SkillSwap+ users
+            </div>
+          </div>
 
-            {/* Chart */}
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Skills
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {platformStats?.total_skills ?? 0}
+                </p>
+              </div>
 
-            <div className="h-112.5">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={userGrowthData}>
-                  <CartesianGrid stroke="#EEEEEE" vertical={false} />
-
-                  <XAxis dataKey="week" axisLine={false} tickLine={false} />
-
-                  <YAxis axisLine={false} tickLine={false} />
-
-                  <Tooltip />
-
-                  <Line
-                    type="monotone"
-                    dataKey="users"
-                    stroke="#4F46E5"
-                    strokeWidth={3}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="rounded-xl bg-purple-50 p-3 text-purple-600">
+                <Zap size={22} />
+              </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between border-t pt-6">
-              <div>
-                <p className="text-xs font-bold uppercase text-gray-400">
-                  New Signups
-                </p>
+            <div className="mt-4 text-xs text-gray-500">
+              Active skills available on the platform
+            </div>
+          </div>
 
-                <p className="text-xl font-bold">2,491</p>
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Sessions
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {platformStats?.total_sessions ?? totalSessions}
+                </p>
               </div>
 
-              <div>
-                <p className="text-xs font-bold uppercase text-gray-400">
-                  Retention Rate
-                </p>
+              <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
+                <Activity size={22} />
+              </div>
+            </div>
 
-                <p className="text-xl font-bold">78%</p>
+            <div className="mt-4 text-xs text-gray-500">
+              Swap sessions created on the platform
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Active Mentors
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900">
+                  {platformStats?.active_mentors ?? 0}
+                </p>
               </div>
 
-              <button className="font-semibold text-[#4F46E5]">
-                Detailed Report →
-              </button>
+              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
+                <Users size={22} />
+              </div>
+            </div>
+
+            <div className="mt-4 text-xs text-gray-500">
+              Mentors currently active
             </div>
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
+        <section className="mt-8">
+          <div className="mb-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              Session Overview
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Real session request and completion statistics
+            </p>
+          </div>
 
-        <div className="col-span-3 flex flex-col gap-6">
-          {/* Trending Skills */}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {sessionOverview.map((item) => {
+              const Icon = item.icon;
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="mb-6 flex items-center gap-3">
-              <TrendingUp className="text-[#4F46E5]" size={22} />
-
-              <h2 className="text-xl font-bold text-[#253858]">
-                Trending Skills
-              </h2>
-            </div>
-
-            <div className="space-y-5">
-              {trendingSkills.map((skill) => (
+              return (
                 <div
-                  key={skill.name}
-                  className="flex items-center justify-between"
+                  key={item.title}
+                  className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF0FF] text-[#4F46E5]">
-                      {skill.icon}
+                  <div className="flex items-center justify-between">
+                    <div className="rounded-xl bg-gray-100 p-3 text-gray-700">
+                      <Icon size={21} />
                     </div>
 
-                    <span className="text-sm font-medium">{skill.name}</span>
+                    <span className="text-xs font-medium text-gray-400">
+                      SkillSwap+
+                    </span>
                   </div>
 
-                  <div className="rounded-lg bg-[#F5F6FA] px-2 py-1 text-sm font-semibold">
-                    {skill.percentage} ↑
+                  <p className="mt-5 text-sm font-medium text-gray-500">
+                    {item.title}
+                  </p>
+
+                  <p className="mt-1 text-3xl font-bold text-gray-900">
+                    {item.value}
+                  </p>
+
+                  <p className="mt-2 text-xs text-gray-500">
+                    {item.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-gray-900">User Growth</h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  New users registered over recent weeks
+                </p>
+              </div>
+
+              <Users size={20} className="text-indigo-500" />
+            </div>
+
+            <div className="mt-6 h-72">
+              {userGrowthData.some((item) => item.users > 0) ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={userGrowthData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="users"
+                      stroke="hsl(239 84% 67%)"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                  No user growth data available
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-gray-900">
+                  Session Activity
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Sessions created during the last seven days
+                </p>
+              </div>
+
+              <Activity size={20} className="text-blue-500" />
+            </div>
+
+            <div className="mt-6 h-72">
+              {sessionActivityData.some((item) => item.sessions > 0) ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={sessionActivityData}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar
+                      dataKey="sessions"
+                      fill="hsl(217 91% 60%)"
+                      radius={[6, 6, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                  No session activity available
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+            <div>
+              <h2 className="font-semibold text-gray-900">Session Status</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Current status of created sessions
+              </p>
+            </div>
+
+            <div className="mt-6 h-80">
+              {sessionStatusData.some((item) => item.value > 0) ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={sessionStatusData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      innerRadius={55}
+                      paddingAngle={3}
+                    >
+                      {sessionStatusData.map((entry, index) => (
+                        <Cell key={entry.name} fill={statusColors[index]} />
+                      ))}
+                    </Pie>
+
+                    <Tooltip />
+
+                    <text
+                      x="50%"
+                      y="47%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-gray-900 text-2xl font-bold"
+                    >
+                      {totalSessions}
+                    </text>
+
+                    <text
+                      x="50%"
+                      y="55%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-gray-500 text-xs"
+                    >
+                      Sessions
+                    </text>
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                  No session status data available
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              {sessionStatusData.map((item, index) => (
+                <div
+                  key={item.name}
+                  className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{
+                        backgroundColor: statusColors[index],
+                      }}
+                    />
+                    <span className="text-xs text-gray-600">{item.name}</span>
                   </div>
+
+                  <span className="text-sm font-semibold text-gray-900">
+                    {item.value}
+                  </span>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Recent Activity */}
-
-          <div className="flex-1 rounded-2xl bg-white p-6 shadow-sm">
-            <h2 className="mb-7 text-xl font-bold text-[#253858]">
-              Recent Activity
-            </h2>
-
-            <div className="space-y-7">
-              <div className="flex gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#4F46E5] text-white">
-                  <Check size={14} />
-                </div>
-
-                <div>
-                  <h3 className="font-semibold">Session Completed</h3>
-
-                  <p className="text-sm text-gray-500">
-                    Advanced React Architecture
-                  </p>
-
-                  <p className="mt-1 text-xs text-[#4F46E5]">5 mins ago</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 text-white">
-                  <UserPlus size={14} />
-                </div>
-
-                <div>
-                  <h3 className="font-semibold">New Mentor Onboarded</h3>
-
-                  <p className="text-sm text-gray-500">Senior DevOps</p>
-
-                  <p className="mt-1 text-xs text-[#4F46E5]">14 mins ago</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 text-white">
-                  <Activity size={14} />
-                </div>
-
-                <div>
-                  <h3 className="font-semibold">System Alert</h3>
-
-                  <p className="text-sm text-gray-500">
-                    High latency detected in Asia-Pacific
-                  </p>
-
-                  <p className="mt-1 text-xs text-[#4F46E5]">45 mins ago</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ================= BOTTOM ================= */}
-
-      <div className="mt-7 grid grid-cols-12 gap-7">
-        {/* Active Sessions */}
-
-        <div className="col-span-8 rounded-2xl bg-white p-7 shadow-sm">
-          <div className="mb-7 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[#253858]">
-              Active Sessions Monitoring
-            </h2>
-
-            <button className="text-xs font-bold uppercase tracking-wider text-[#4F46E5]">
-              View All Monitoring
-            </button>
-          </div>
-
-          <div className="grid grid-cols-5 border-b pb-3 text-xs font-bold uppercase tracking-wider text-gray-400">
-            <p>Session Title</p>
-            <p>Mentor</p>
-            <p>Participants</p>
-            <p>Status</p>
-            <p>Duration</p>
-          </div>
-
-          <div className="grid grid-cols-5 items-center border-b py-5 text-sm">
+          <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
             <div>
-              <p className="font-semibold">Modern CSS Layouts</p>
-
-              <p className="text-xs text-gray-400">Design Systems Track</p>
+              <h2 className="font-semibold text-gray-900">Popular Skills</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Skills with the most sessions
+              </p>
             </div>
 
-            <p>Elena R.</p>
+            <div className="mt-6 h-80">
+              {popularSkills.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={popularSkills}
+                    layout="vertical"
+                    margin={{
+                      left: 20,
+                      right: 20,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" width={100} />
+                    <Tooltip />
+                    <Bar
+                      dataKey="sessions"
+                      fill="hsl(271 91% 65%)"
+                      radius={[0, 6, 6, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                  No skill session data available
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
 
-            <p>12</p>
-
-            <span className="w-fit rounded-full bg-green-50 px-3 py-1 text-xs text-green-600">
-              LIVE
-            </span>
-
-            <p>45 / 60 min</p>
-          </div>
-
-          <div className="grid grid-cols-5 items-center py-5 text-sm">
+        <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
-              <p className="font-semibold">Zero to Kubernetes</p>
+              <h2 className="font-semibold text-gray-900">
+                Session Statistics
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Additional real-time session metrics
+              </p>
+            </div>
+          </div>
 
-              <p className="text-xs text-gray-400">Cloud Infrastructure</p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-sm text-gray-500">Active Sessions</p>
+              <p className="mt-1 text-2xl font-bold text-gray-900">
+                {activeSessions}
+              </p>
             </div>
 
-            <p>David K.</p>
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-sm text-gray-500">Completed Sessions</p>
+              <p className="mt-1 text-2xl font-bold text-gray-900">
+                {completedSessions}
+              </p>
+            </div>
 
-            <p>24</p>
-
-            <span className="w-fit rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">
-              WAITING
-            </span>
-
-            <p>Starts in 5m</p>
+            <div className="rounded-xl bg-gray-50 p-4">
+              <p className="text-sm text-gray-500">Cancelled Sessions</p>
+              <p className="mt-1 text-2xl font-bold text-gray-900">
+                {cancelledSessions}
+              </p>
+            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Promotion Card */}
+        <section className="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div>
+            <h2 className="font-semibold text-gray-900">Recent Sessions</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Latest sessions created on SkillSwap+
+            </p>
+          </div>
 
-        <div className="col-span-4 rounded-2xl bg-[#4F46E5] p-7 text-white shadow-lg">
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-200">
-            Curator&apos;s Choice
-          </p>
+          <div className="mt-5 overflow-x-auto">
+            {recentSessions.length > 0 ? (
+              <table className="w-full min-w-175 text-left">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Skill
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Learner
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Mentor
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Date
+                    </th>
+                  </tr>
+                </thead>
 
-          <h2 className="mt-3 text-3xl font-bold">
-            Mastering Generative AI Workflows
-          </h2>
+                <tbody>
+                  {recentSessions.map((session) => (
+                    <tr
+                      key={session.id}
+                      className="border-b border-gray-50 last:border-0"
+                    >
+                      <td className="px-4 py-4">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {session.skill_name || "Unknown Skill"}
+                          </p>
+                          <p className="mt-0.5 text-xs text-gray-400">
+                            {session.category || "Skill session"}
+                          </p>
+                        </div>
+                      </td>
 
-          <p className="mt-5 leading-7 text-indigo-100">
-            This course has seen a 140% increase in enrollments this week.
-            Consider promoting the mentor to Featured status.
-          </p>
+                      <td className="px-4 py-4">
+                        <p className="text-sm font-medium text-gray-800">
+                          {session.learner_name || "Unknown Learner"}
+                        </p>
+                      </td>
 
-          <button className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 font-semibold text-[#4F46E5]">
-            <Zap size={16} />
-            Promote Skill
-          </button>
-        </div>
+                      <td className="px-4 py-4">
+                        <p className="text-sm font-medium text-gray-800">
+                          {session.mentor_name || "Unknown Mentor"}
+                        </p>
+                      </td>
+
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                            session.status === "completed"
+                              ? "bg-green-50 text-green-700"
+                              : session.status === "cancelled"
+                                ? "bg-red-50 text-red-700"
+                                : session.status === "in_progress"
+                                  ? "bg-purple-50 text-purple-700"
+                                  : session.status === "scheduled"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "bg-yellow-50 text-yellow-700"
+                          }`}
+                        >
+                          {session.status.replace("_", " ")}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-4 text-sm text-gray-500">
+                        {new Date(session.created_at).toLocaleDateString(
+                          "en-IN",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          },
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="py-12 text-center text-sm text-gray-400">
+                No sessions available
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

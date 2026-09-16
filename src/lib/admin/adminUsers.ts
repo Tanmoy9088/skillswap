@@ -1,10 +1,40 @@
 import { createClient } from "@/lib/supabase/client";
-import type { AdminUser } from "./adminTypes";
 
-export const getAdminUsers = async (): Promise<AdminUser[]> => {
+import type { AdminUser, AdminUsersResponse } from "./adminTypes";
+
+export const getAdminUsers = async (
+  page: number = 1,
+  pageSize: number = 3,
+): Promise<AdminUsersResponse> => {
   const supabase = createClient();
 
-  const { data, error } = await supabase.rpc("get_admin_users");
+  const { data, error } = await supabase.rpc("get_admin_users", {
+    p_page: page,
+    p_page_size: pageSize,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  const result = data ?? {};
+
+  const users = (result.users ?? []) as AdminUser[];
+  const total = Number(result.total ?? 0);
+
+  return {
+    users,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+  };
+};
+
+export const getAdminAllUsers = async (): Promise<AdminUser[]> => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.rpc("get_admin_all_users");
 
   if (error) {
     throw new Error(error.message);

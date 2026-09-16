@@ -63,3 +63,10 @@ export interface AdminSession {
   mentor_name: string | null;
   mentor_profile_img: string | null;
 }
+export interface AdminUsersResponse {
+  users: AdminUser[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}

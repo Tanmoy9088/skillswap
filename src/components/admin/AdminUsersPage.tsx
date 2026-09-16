@@ -1,17 +1,45 @@
 "use client";
 
-import { Users, UserCheck, UserX } from "lucide-react";
+import Image from "next/image";
+import {
+  Users,
+  UserCheck,
+  UserX,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+
 import { useAdminUsers } from "@/hooks/admin/useAdminUsers";
 import { useToggleAdminUserStatus } from "@/hooks/admin/useToggleAdminUserStatus";
-import Image from "next/image";
+import { useUserPagination } from "@/store/userManagementStore";
 
 const AdminUsersPage = () => {
-  const { data: users, isLoading, isError, error } = useAdminUsers();
+  const pageSize = 3;
+
+  const page = useUserPagination((state) => state.page);
+  const setPrev = useUserPagination((state) => state.setPrev);
+  const setNext = useUserPagination((state) => state.setNext);
+  const setPage = useUserPagination((state) => state.setPage);
+
+  const {
+    data: users,
+    isLoading,
+    isError,
+    error,
+  } = useAdminUsers(page, pageSize);
 
   const toggleUserStatus = useToggleAdminUserStatus();
+
+  const userList = users?.users ?? [];
+  const totalUsers = users?.total ?? 0;
+  const totalPages = users?.totalPages ?? 1;
+
+  const startUser = totalUsers === 0 ? 0 : (page - 1) * pageSize + 1;
+
+  const endUser = Math.min(page * pageSize, totalUsers);
+
   return (
     <div className="min-h-screen bg-[#FAF8FF] p-8">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-[#E2DFFF] p-3">
@@ -19,7 +47,9 @@ const AdminUsersPage = () => {
           </div>
 
           <div>
-            <h1 className="text-3xl font-bold text-[#253858]">Users</h1>
+            <h1 className="text-3xl font-bold text-[#253858]">
+              User Management
+            </h1>
 
             <p className="mt-1 text-gray-500">
               Manage SkillSwap+ users and account status.
@@ -28,14 +58,11 @@ const AdminUsersPage = () => {
         </div>
       </div>
 
-      {/* Users Table */}
       <div className="rounded-2xl bg-white shadow-sm">
-        {/* Loading */}
         {isLoading && (
           <div className="p-8 text-center text-gray-500">Loading users...</div>
         )}
 
-        {/* Error */}
         {isError && (
           <div className="p-8 text-center">
             <p className="font-semibold text-red-500">Failed to load users</p>
@@ -46,41 +73,42 @@ const AdminUsersPage = () => {
           </div>
         )}
 
-        {/* Empty */}
-        {!isLoading && !isError && users?.length === 0 && (
+        {!isLoading && !isError && userList.length === 0 && (
           <div className="p-8 text-center text-gray-500">No users found.</div>
         )}
 
-        {/* Data */}
-        {!isLoading && !isError && users && users.length > 0 && (
+        {!isLoading && !isError && userList.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-175">
+            <table className="w-full min-w-200">
               <thead>
                 <tr className="border-b text-left text-xs font-bold uppercase tracking-wider text-gray-400">
                   <th className="px-6 py-4">User</th>
+
                   <th className="px-6 py-4">Role</th>
+
                   <th className="px-6 py-4">Status</th>
+
                   <th className="px-6 py-4">Joined</th>
+
                   <th className="px-6 py-4">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {users.map((user) => (
+                {userList.map((user) => (
                   <tr
                     key={user.id}
                     className="border-b last:border-0 hover:bg-gray-50"
                   >
-                    {/* User */}
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         {user.profile_img ? (
                           <Image
-                            src={user.profile_img || "/image.png"}
+                            src={user.profile_img}
                             alt={user.name ?? "User"}
-                            className="h-10 w-10 rounded-full object-cover"
                             width={40}
                             height={40}
+                            className="h-10 w-10 rounded-full object-cover"
                           />
                         ) : (
                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E2DFFF] font-semibold text-[#4F46E5]">
@@ -100,14 +128,12 @@ const AdminUsersPage = () => {
                       </div>
                     </td>
 
-                    {/* Role */}
                     <td className="px-6 py-5">
                       <span className="rounded-full bg-[#EEF0FF] px-3 py-1 text-xs font-semibold capitalize text-[#4F46E5]">
                         {user.role ?? "user"}
                       </span>
                     </td>
 
-                    {/* Status */}
                     <td className="px-6 py-5">
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -116,14 +142,18 @@ const AdminUsersPage = () => {
                             : "bg-red-50 text-red-500"
                         }`}
                       >
-                        {user.is_active ? "Active" : "Inactive"}
+                        {user.is_active ? "Active" : "Deactivated"}
                       </span>
                     </td>
 
-                    {/* Joined */}
                     <td className="px-6 py-5 text-sm text-gray-500">
-                      {new Date(user.created_at).toLocaleDateString()}
+                      {new Date(user.created_at).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </td>
+
                     <td className="px-6 py-5">
                       {user.role === "admin" ? (
                         <span className="text-xs text-gray-400">Protected</span>
@@ -161,6 +191,56 @@ const AdminUsersPage = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {!isLoading && !isError && totalUsers > 0 && (
+          <div className="flex flex-col gap-4 border-t bg-[#F5F6FB] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[#5C6981]">
+              Showing{" "}
+              <span className="font-semibold text-[#253858]">{startUser}</span>{" "}
+              to <span className="font-semibold text-[#253858]">{endUser}</span>{" "}
+              of{" "}
+              <span className="font-semibold text-[#253858]">{totalUsers}</span>{" "}
+              users
+            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={setPrev}
+                disabled={page === 1}
+                className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-gray-500 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    onClick={() => setPage(pageNumber)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition ${
+                      page === pageNumber
+                        ? "bg-[#4F46E5] text-white"
+                        : "bg-white text-[#53617A] hover:bg-gray-100"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                ),
+              )}
+
+              <button
+                type="button"
+                onClick={setNext}
+                disabled={page >= totalPages}
+                className="flex h-9 w-9 items-center justify-center rounded-md bg-white text-gray-500 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         )}
       </div>

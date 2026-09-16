@@ -2,13 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getAdminUsers } from "@/lib/admin/adminUsers";
+import { getAdminAllUsers } from "@/lib/admin/adminUsers";
 import { getAdminSessions } from "@/lib/admin/adminSessions";
 
 export const useAdminAnalytics = () => {
   const usersQuery = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: getAdminUsers,
+    queryKey: ["admin-all-users"],
+    queryFn: getAdminAllUsers,
   });
 
   const sessionsQuery = useQuery({
@@ -21,6 +21,6 @@ export const useAdminAnalytics = () => {
     sessions: sessionsQuery.data ?? [],
     isLoading: usersQuery.isLoading || sessionsQuery.isLoading,
     isError: usersQuery.isError || sessionsQuery.isError,
-    error: usersQuery.error || sessionsQuery.error,
+    error: usersQuery.error || sessionsQuery.error || null,
   };
 };
