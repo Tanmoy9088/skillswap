@@ -3,11 +3,20 @@
 import { Coins, Wallet as WalletIcon } from "lucide-react";
 
 import TokenBalanceCard from "@/components/wallet/TokenBalanceCard";
+import TokenPackageList from "@/components/wallet/TokenPackages";
 import TokenTransactionHistory from "@/components/wallet/TokenTransactionHistory";
+
 import { useTokenTransactions } from "@/hooks/wallet/useTokenTransactions";
+import { useTokenBalance } from "@/hooks/wallet/useTokenBalance";
+import { useCurrentProfile } from "@/hooks/use-current-profile";
 
 const Wallet = () => {
-  const { data: transactions = [] } = useTokenTransactions();
+  const { data: transactions = [], refetch: refetchTransactions } =
+    useTokenTransactions();
+
+  const { refetch: refetchBalance } = useTokenBalance();
+
+  const { data: profile } = useCurrentProfile();
 
   const tokensEarned = transactions
     .filter((transaction) => transaction.amount > 0)
@@ -19,10 +28,14 @@ const Wallet = () => {
       (total, transaction) => total + Math.abs(Number(transaction.amount)),
       0,
     );
+
+  const handlePurchaseSuccess = async () => {
+    await Promise.all([refetchBalance(), refetchTransactions()]);
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 px-4 pb-12 pt-28 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
@@ -41,7 +54,6 @@ const Wallet = () => {
           </div>
         </div>
 
-        {/* Wallet Content */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <TokenBalanceCard />
@@ -64,11 +76,18 @@ const Wallet = () => {
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-8">
+          <TokenPackageList
+            userName={profile?.name}
+            userEmail={profile?.email}
+            onPurchaseSuccess={handlePurchaseSuccess}
+          />
+        </div>
+
+        <div className="mt-8">
           <TokenTransactionHistory />
         </div>
 
-        {/* How Tokens Work */}
         <section className="mt-6 rounded-2xl border border-indigo-100 bg-indigo-50 p-6">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-indigo-600 shadow-sm">
@@ -92,6 +111,7 @@ const Wallet = () => {
     </main>
   );
 };
+
 interface WalletStatCardProps {
   label: string;
   value: number;
