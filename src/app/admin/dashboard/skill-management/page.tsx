@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { BookOpen, Plus, Search, XCircle, Power } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import { confirmToast } from "@/components/lib/confirmToast";
 import { useAdminSkills } from "@/hooks/admin/useAdminSkills";
 import { useDeleteAdminSkill } from "@/hooks/admin/useDeleteAdminSkill";
 import { useSkillDiscovery } from "@/store/skillDiscovery";
@@ -18,15 +20,8 @@ const AdminSkillsPage = () => {
 
   const deleteSkill = useDeleteAdminSkill();
 
-  // Controls Add Skill modal
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
-  /*
-   * Filter skills by:
-   * - name
-   * - category
-   * - description
-   */
   const filteredSkills = useMemo(() => {
     if (!skills) return [];
 
@@ -44,9 +39,6 @@ const AdminSkillsPage = () => {
     );
   }, [skills, search]);
 
-  /*
-   * Statistics
-   */
   const totalSkills = skills?.length ?? 0;
 
   const activeSkills = skills?.filter((skill) => skill.is_active).length ?? 0;
@@ -54,9 +46,28 @@ const AdminSkillsPage = () => {
   const inactiveSkills =
     skills?.filter((skill) => !skill.is_active).length ?? 0;
 
-  /*
-   * Loading
-   */
+  const handleDeactivateSkill = (skillId: string, skillName: string) => {
+    confirmToast({
+      title: "Deactivate Skill",
+      message: `Are you sure you want to deactivate "${skillName}"?`,
+      confirmText: "Deactivate",
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteSkill.mutateAsync(skillId);
+
+          toast.success("Skill deactivated successfully.");
+        } catch (error) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to deactivate skill.",
+          );
+        }
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="p-6 sm:p-8">
@@ -97,9 +108,6 @@ const AdminSkillsPage = () => {
     );
   }
 
-  /*
-   * Error
-   */
   if (isError) {
     return (
       <div className="p-6 sm:p-8">
@@ -124,10 +132,6 @@ const AdminSkillsPage = () => {
     <>
       <div className="p-6 sm:p-8">
         <div className="mx-auto max-w-7xl space-y-6">
-          {/* ================================================= */}
-          {/* HEADER */}
-          {/* ================================================= */}
-
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex items-center gap-3">
@@ -147,7 +151,6 @@ const AdminSkillsPage = () => {
               </div>
             </div>
 
-            {/* Add Skill */}
             <button
               type="button"
               onClick={() => setIsAddSkillModalOpen(true)}
@@ -158,12 +161,7 @@ const AdminSkillsPage = () => {
             </button>
           </div>
 
-          {/* ================================================= */}
-          {/* STATS */}
-          {/* ================================================= */}
-
           <div className="grid gap-4 sm:grid-cols-3">
-            {/* Total */}
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -178,7 +176,6 @@ const AdminSkillsPage = () => {
               </div>
             </div>
 
-            {/* Active */}
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -195,7 +192,6 @@ const AdminSkillsPage = () => {
               </div>
             </div>
 
-            {/* Inactive */}
             <div className="rounded-2xl border bg-white p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
@@ -213,10 +209,6 @@ const AdminSkillsPage = () => {
             </div>
           </div>
 
-          {/* ================================================= */}
-          {/* DELETE ERROR */}
-          {/* ================================================= */}
-
           {deleteSkill.isError && (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {deleteSkill.error instanceof Error
@@ -225,12 +217,7 @@ const AdminSkillsPage = () => {
             </div>
           )}
 
-          {/* ================================================= */}
-          {/* SKILLS TABLE */}
-          {/* ================================================= */}
-
           <div className="rounded-2xl border bg-white shadow-sm">
-            {/* Search */}
             <div className="border-b p-5 sm:p-6">
               <div className="relative max-w-md">
                 <Search
@@ -248,7 +235,6 @@ const AdminSkillsPage = () => {
               </div>
             </div>
 
-            {/* No skills */}
             {!skills || skills.length === 0 ? (
               <div className="flex min-h-80 flex-col items-center justify-center p-8 text-center">
                 <BookOpen className="h-12 w-12 text-gray-300" />
@@ -309,10 +295,6 @@ const AdminSkillsPage = () => {
                         key={skill.id}
                         className="transition hover:bg-gray-50"
                       >
-                        {/* =============================== */}
-                        {/* SKILL */}
-                        {/* =============================== */}
-
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-indigo-50">
@@ -345,29 +327,17 @@ const AdminSkillsPage = () => {
                           </div>
                         </td>
 
-                        {/* =============================== */}
-                        {/* CATEGORY */}
-                        {/* =============================== */}
-
                         <td className="px-6 py-4">
                           <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
                             {skill.category || "—"}
                           </span>
                         </td>
 
-                        {/* =============================== */}
-                        {/* DESCRIPTION */}
-                        {/* =============================== */}
-
                         <td className="px-6 py-4">
                           <p className="max-w-80 truncate text-sm text-gray-500">
                             {skill.description || "No description"}
                           </p>
                         </td>
-
-                        {/* =============================== */}
-                        {/* STATUS */}
-                        {/* =============================== */}
 
                         <td className="px-6 py-4">
                           {skill.is_active ? (
@@ -381,34 +351,18 @@ const AdminSkillsPage = () => {
                           )}
                         </td>
 
-                        {/* =============================== */}
-                        {/* CREATED */}
-                        {/* =============================== */}
-
                         <td className="whitespace-nowrap px-6 py-4 text-gray-500">
                           {new Date(skill.created_at).toLocaleDateString()}
                         </td>
-
-                        {/* =============================== */}
-                        {/* ACTIONS */}
-                        {/* =============================== */}
 
                         <td className="px-6 py-4 text-right">
                           {skill.is_active ? (
                             <button
                               type="button"
                               disabled={deleteSkill.isPending}
-                              onClick={() => {
-                                const confirmed = window.confirm(
-                                  `Are you sure you want to deactivate "${skill.name}"?`,
-                                );
-
-                                if (!confirmed) {
-                                  return;
-                                }
-
-                                deleteSkill.mutate(skill.id);
-                              }}
+                              onClick={() =>
+                                handleDeactivateSkill(skill.id, skill.name)
+                              }
                               className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {deleteSkill.isPending
@@ -430,10 +384,6 @@ const AdminSkillsPage = () => {
           </div>
         </div>
       </div>
-
-      {/* ================================================= */}
-      {/* ADD SKILL MODAL */}
-      {/* ================================================= */}
 
       <AdminAddSkillModal
         isOpen={isAddSkillModalOpen}
