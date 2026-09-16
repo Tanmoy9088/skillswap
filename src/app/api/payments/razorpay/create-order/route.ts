@@ -89,6 +89,8 @@ export async function POST(request: Request) {
       .single();
 
     if (purchaseError || !purchase) {
+      console.error("Token purchase insert error:", purchaseError);
+
       return NextResponse.json(
         {
           success: false,
@@ -120,7 +122,6 @@ export async function POST(request: Request) {
           error instanceof Error
             ? error.message
             : "Failed to create Razorpay order.",
-        error: error,
       },
       {
         status: 500,
