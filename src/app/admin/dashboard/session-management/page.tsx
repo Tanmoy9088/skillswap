@@ -2,7 +2,9 @@
 
 import { Calendar, RefreshCw, XCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import { confirmToast } from "@/components/lib/confirmToast";
 import { useAdminSessions } from "@/hooks/admin/useAdminSessions";
 import type { AdminSession } from "@/lib/admin";
 import { useCancelAdminSession } from "@/hooks/admin/useCancelAdminSession";
@@ -26,6 +28,7 @@ const AdminSessionsPage = () => {
   const [selectedSession, setSelectedSession] = useState<AdminSession | null>(
     null,
   );
+
   const cancelSession = useCancelAdminSession();
 
   const filteredSessions = useMemo(() => {
@@ -64,11 +67,41 @@ const AdminSessionsPage = () => {
       sessions?.filter((session) => session.status === "cancelled").length ?? 0,
   };
 
+  const handleCancelSession = () => {
+    if (!selectedSession) {
+      return;
+    }
+
+    confirmToast({
+      title: "Cancel Session",
+      message:
+        "Are you sure you want to cancel this session? The learner will be refunded.",
+      confirmText: "Cancel Session",
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          await cancelSession.mutateAsync(selectedSession.id);
+
+          setSelectedSession(null);
+
+          toast.success("Session cancelled successfully.");
+        } catch (error) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to cancel session.",
+          );
+        }
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="p-6 sm:p-8">
         <div className="mx-auto max-w-7xl space-y-6">
           <div className="h-9 w-56 animate-pulse rounded-lg bg-gray-200" />
+
           <div className="h-5 w-96 animate-pulse rounded bg-gray-200" />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -120,7 +153,6 @@ const AdminSessionsPage = () => {
   return (
     <div className="p-6 sm:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
-        {/* Header */}
         <div>
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
@@ -137,6 +169,7 @@ const AdminSessionsPage = () => {
               </p>
             </div>
           </div>
+
           <button
             type="button"
             onClick={() => refetch()}
@@ -148,7 +181,6 @@ const AdminSessionsPage = () => {
           </button>
         </div>
 
-        {/* Stats */}
         <SessionStats
           total={stats.total}
           active={stats.active}
@@ -156,7 +188,6 @@ const AdminSessionsPage = () => {
           cancelled={stats.cancelled}
         />
 
-        {/* Sessions table */}
         <div className="rounded-2xl border bg-white shadow-sm">
           <SessionFilters
             search={search}
@@ -168,6 +199,7 @@ const AdminSessionsPage = () => {
               setStatusFilter("All");
             }}
           />
+
           <SessionsTable
             sessions={filteredSessions}
             onView={setSelectedSession}
@@ -181,173 +213,8 @@ const AdminSessionsPage = () => {
               setSelectedSession(null);
               cancelSession.reset();
             }}
-            onCancel={() => {
-              if (!selectedSession) return;
-
-              const confirmed = window.confirm(
-                "Are you sure you want to cancel this session? The learner will be refunded.",
-              );
-
-              if (!confirmed) return;
-
-              cancelSession.mutate(selectedSession.id);
-            }}
+            onCancel={handleCancelSession}
           />
-          {/* {selectedSession && (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-              onClick={() => setSelectedSession(null)}
-            >
-              <div
-                className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">
-                      Session Details
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {selectedSession.skill_name || "Unknown skill"}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedSession(null)}
-                    className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                  >
-                    <XCircle size={20} />
-                  </button>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <span className="text-sm text-gray-500">Status</span>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        statusStyles[selectedSession.status] ||
-                        "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {selectedSession.status.replace("_", " ")}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <span className="text-sm text-gray-500">Mentor</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedSession.mentor_name || "Unknown mentor"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <span className="text-sm text-gray-500">Learner</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedSession.learner_name || "Unknown learner"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <span className="text-sm text-gray-500">Category</span>
-                    <span className="font-medium text-gray-900">
-                      {selectedSession.category || "—"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <span className="text-sm text-gray-500">Token Rate</span>
-                    <span className="font-semibold text-indigo-600">
-                      {selectedSession.token_rate != null
-                        ? `${selectedSession.token_rate} tokens`
-                        : "—"}
-                    </span>
-                  </div>
-
-                  <div className="border-b pb-3">
-                    <p className="text-sm text-gray-500">Scheduled</p>
-                    <p className="mt-1 font-medium text-gray-900">
-                      {selectedSession.scheduled_at
-                        ? new Date(
-                            selectedSession.scheduled_at,
-                          ).toLocaleString()
-                        : "Not scheduled"}
-                    </p>
-                  </div>
-
-                  <div className="border-b pb-3">
-                    <p className="text-sm text-gray-500">Started</p>
-                    <p className="mt-1 font-medium text-gray-900">
-                      {selectedSession.started_at
-                        ? new Date(selectedSession.started_at).toLocaleString()
-                        : "Not started"}
-                    </p>
-                  </div>
-
-                  <div className="border-b pb-3">
-                    <p className="text-sm text-gray-500">Completed</p>
-                    <p className="mt-1 font-medium text-gray-900">
-                      {selectedSession.completed_at
-                        ? new Date(
-                            selectedSession.completed_at,
-                          ).toLocaleString()
-                        : "Not completed"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-500">Cancelled</p>
-                    <p className="mt-1 font-medium text-gray-900">
-                      {selectedSession.cancelled_at
-                        ? new Date(
-                            selectedSession.cancelled_at,
-                          ).toLocaleString()
-                        : "Not cancelled"}
-                    </p>
-                  </div>
-                </div>
-                {cancelSession.isError && (
-                  <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {cancelSession.error instanceof Error
-                      ? cancelSession.error.message
-                      : "Failed to cancel session."}
-                  </div>
-                )}
-                {selectedSession.status === "scheduled" && (
-                  <button
-                    type="button"
-                    disabled={cancelSession.isPending}
-                    onClick={() => {
-                      const confirmed = window.confirm(
-                        "Are you sure you want to cancel this scheduled session? The learner will receive a token refund.",
-                      );
-
-                      if (!confirmed) return;
-
-                      cancelSession.mutate(selectedSession.id, {
-                        onSuccess: () => {
-                          setSelectedSession(null);
-                        },
-                      });
-                    }}
-                    className="mt-6 w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {cancelSession.isPending
-                      ? "Cancelling..."
-                      : "Cancel Session"}
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedSession(null)}
-                  className="mt-6 w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )} */}
         </div>
       </div>
     </div>
