@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { UserRound } from "lucide-react";
+import { toast } from "sonner";
 
 import RescheduleSessionModal from "@/components/swaps/RescheduleSessionModal";
 import RateMentorModal from "@/components/swaps/RateMentorModal";
@@ -20,7 +21,6 @@ import { useCancelSwapSession } from "@/hooks/skills/useCancelSwapSession";
 import { useSwapRating } from "@/hooks/skills/useSwapRating";
 
 import type { Swap } from "@/types/types/swaps";
-import { toast } from "sonner";
 
 interface SwapCardProps {
   swap: Swap;
@@ -30,56 +30,21 @@ interface SwapCardProps {
 const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
   const router = useRouter();
 
-  /*
-   * ============================================================
-   * MODAL STATE
-   * ============================================================
-   */
-
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isRatingOpen, setIsRatingOpen] = useState(false);
 
-  /*
-   * ============================================================
-   * MUTATIONS
-   * ============================================================
-   */
-
   const confirmSchedule = useConfirmScheduleSwap();
-
   const respondToReschedule = useRespondToReschedule();
-
   const startSession = useStartSwapSession();
-
   const completeSession = useCompleteSwapSession();
-
   const cancelSession = useCancelSwapSession();
-
-  /*
-   * ============================================================
-   * RATING
-   * ============================================================
-   */
 
   const { data: existingRating, isLoading: isRatingLoading } = useSwapRating(
     swap.id,
   );
 
-  /*
-   * ============================================================
-   * ROLE
-   * ============================================================
-   */
-
   const isLearner = swap.learner_auth_user_id === currentUserId;
-
   const isMentor = swap.mentor_auth_user_id === currentUserId;
-
-  /*
-   * ============================================================
-   * OTHER USER
-   * ============================================================
-   */
 
   const otherUserId = isLearner
     ? swap.mentor_auth_user_id
@@ -93,11 +58,42 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
 
   const otherUserRole = isLearner ? "Mentor" : "Learner";
 
-  /*
-   * ============================================================
-   * START SESSION
-   * ============================================================
-   */
+  const showConfirmation = (
+    message: string,
+    onConfirm: () => void | Promise<void>,
+  ) => {
+    toast.custom(
+      (toastId) => (
+        <div className="w-90 rounded-xl border border-gray-200 bg-white p-4 shadow-xl">
+          <p className="text-sm font-medium text-gray-900">{message}</p>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(toastId)}
+              className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                toast.dismiss(toastId);
+                await onConfirm();
+              }}
+              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+      },
+    );
+  };
 
   const handleStartSession = async () => {
     if (!isMentor) {
@@ -115,12 +111,6 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
     }
   };
 
-  /*
-   * ============================================================
-   * JOIN SESSION
-   * ============================================================
-   */
-
   const handleJoinSession = () => {
     if (swap.status !== "in_progress") {
       return;
@@ -129,121 +119,81 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
     router.push(`/swaps/${swap.id}/session`);
   };
 
-  /*
-   * ============================================================
-   * CANCEL SESSION
-   * ============================================================
-   */
-
-  const handleCancelSession = async () => {
-    const confirmed = window.confirm(
+  const handleCancelSession = () => {
+    showConfirmation(
       "Are you sure you want to cancel this session?",
+      async () => {
+        try {
+          await cancelSession.mutateAsync(swap.id);
+
+          toast.success("Session cancelled successfully!");
+        } catch (error) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to cancel session.",
+          );
+        }
+      },
     );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await cancelSession.mutateAsync(swap.id);
-
-      toast.success("Session cancelled successfully!");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to cancel session.",
-      );
-    }
   };
 
-  /*
-   * ============================================================
-   * MENTOR CONFIRMS LEARNER'S REQUEST
-   * ============================================================
-   */
+  const handleConfirmSchedule = () => {
+    showConfirmation("Confirm this requested session time?", async () => {
+      try {
+        await confirmSchedule.mutateAsync(swap.id);
 
-  const handleConfirmSchedule = async () => {
-    const confirmed = window.confirm("Confirm this requested session time?");
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await confirmSchedule.mutateAsync(swap.id);
-
-      toast.success("Session confirmed successfully!");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to confirm session.",
-      );
-    }
+        toast.success("Session confirmed successfully!");
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to confirm session.",
+        );
+      }
+    });
   };
 
-  /*
-   * ============================================================
-   * LEARNER ACCEPTS MENTOR'S NEW TIME
-   * ============================================================
-   */
+  const handleAcceptReschedule = () => {
+    showConfirmation("Accept this new session time?", async () => {
+      try {
+        await respondToReschedule.mutateAsync({
+          swapId: swap.id,
+          accept: true,
+        });
 
-  const handleAcceptReschedule = async () => {
-    const confirmed = window.confirm("Accept this new session time?");
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await respondToReschedule.mutateAsync({
-        swapId: swap.id,
-        accept: true,
-      });
-
-      toast.success("New session time accepted!");
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to accept the new time.",
-      );
-    }
+        toast.success("New session time accepted!");
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to accept the new time.",
+        );
+      }
+    });
   };
 
-  /*
-   * ============================================================
-   * LEARNER REJECTS MENTOR'S NEW TIME
-   * ============================================================
-   */
-
-  const handleRejectReschedule = async () => {
-    const confirmed = window.confirm(
+  const handleRejectReschedule = () => {
+    showConfirmation(
       "Reject this proposed time? You will be able to request another time.",
+      async () => {
+        try {
+          await respondToReschedule.mutateAsync({
+            swapId: swap.id,
+            accept: false,
+          });
+
+          toast.success(
+            "New time rejected. You can request another session time.",
+          );
+        } catch (error) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to reject the new time.",
+          );
+        }
+      },
     );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await respondToReschedule.mutateAsync({
-        swapId: swap.id,
-        accept: false,
-      });
-
-      toast.success("New time rejected. You can request another session time.");
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to reject the new time.",
-      );
-    }
   };
-
-  /*
-   * ============================================================
-   * COMPLETE SESSION
-   * ============================================================
-   */
 
   const handleCompleteSession = async () => {
     try {
@@ -257,21 +207,9 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
     }
   };
 
-  /*
-   * ============================================================
-   * NAVIGATION
-   * ============================================================
-   */
-
   const handleScheduleSession = () => {
     router.push(`/bookings/${swap.id}`);
   };
-
-  /*
-   * ============================================================
-   * STATUS
-   * ============================================================
-   */
 
   const formattedStatus = swap.status
     .replaceAll("_", " ")
@@ -283,43 +221,31 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
   const isSessionActionPending =
     startSession.isPending || cancelSession.isPending;
 
-  /*
-   * ============================================================
-   * STATUS CONFIG
-   * ============================================================
-   */
-
   const statusConfig = {
     accepted: {
       badge: "bg-gray-100 text-gray-700",
       accent: "bg-gray-400",
     },
-
     schedule_requested: {
       badge: "bg-blue-100 text-blue-700",
       accent: "bg-blue-500",
     },
-
     mentor_reschedule_proposed: {
       badge: "bg-purple-100 text-purple-700",
       accent: "bg-purple-500",
     },
-
     scheduled: {
       badge: "bg-green-100 text-green-700",
       accent: "bg-green-500",
     },
-
     in_progress: {
       badge: "bg-yellow-100 text-yellow-700",
       accent: "bg-yellow-500",
     },
-
     completed: {
       badge: "bg-emerald-100 text-emerald-700",
       accent: "bg-emerald-500",
     },
-
     cancelled: {
       badge: "bg-red-100 text-red-700",
       accent: "bg-red-500",
@@ -329,24 +255,14 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
   const currentStatusConfig =
     statusConfig[swap.status] ?? statusConfig.accepted;
 
-  /*
-   * ============================================================
-   * RENDER
-   * ============================================================
-   */
-
   return (
     <>
       <article className="group relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-        {/* TOP ACCENT */}
-
         <div
           className={`absolute inset-x-0 top-0 h-1.5 ${currentStatusConfig.accent}`}
         />
 
         <div className="p-5 sm:p-6">
-          {/* HEADER */}
-
           <SwapCardHeader
             swap={swap}
             isLearner={isLearner}
@@ -355,16 +271,12 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
             statusConfig={currentStatusConfig}
           />
 
-          {/* USER */}
-
           <SwapCardUser
             userId={otherUserId}
             userName={otherUserName}
             userImage={otherUserImage}
             userRole={otherUserRole}
           />
-
-          {/* ROLE DESCRIPTION */}
 
           <div className="mt-4">
             <p className="text-sm text-gray-500">
@@ -373,8 +285,6 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
                 : "You are teaching this skill to your learner."}
             </p>
           </div>
-
-          {/* STATUS CONTENT */}
 
           <SwapCardStatusContent
             swap={swap}
@@ -401,8 +311,6 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
             completeSessionPending={completeSession.isPending}
           />
 
-          {/* MOBILE PROFILE */}
-
           <Link
             href={`/mentors/${otherUserId}`}
             className="mt-5 flex items-center justify-center gap-1 text-sm font-semibold text-gray-500 transition hover:text-black sm:hidden"
@@ -413,8 +321,6 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
         </div>
       </article>
 
-      {/* MENTOR: SUGGEST ANOTHER TIME MODAL */}
-
       {isRescheduleOpen && isMentor && (
         <RescheduleSessionModal
           swapId={swap.id}
@@ -423,8 +329,6 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
           onClose={() => setIsRescheduleOpen(false)}
         />
       )}
-
-      {/* RATE MENTOR MODAL */}
 
       {isRatingOpen && (
         <RateMentorModal
