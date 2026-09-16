@@ -1,43 +1,22 @@
-// components/SessionOptionsManager.tsx
-
 "use client";
 
 import { useState } from "react";
 import { Check, Clock3, Coins, Loader2, Pencil, Plus, X } from "lucide-react";
+import { toast } from "sonner";
 
+import { confirmToast } from "@/components/lib/confirmToast";
 import { useMySessionOptions } from "@/hooks/skills/useMySessionOptions";
-
 import { useCreateSessionOption } from "@/hooks/skills/useCreateSessionOption";
-
 import { useUpdateSessionOption } from "@/hooks/skills/useUpdateSessionOption";
-
 import { useDeactivateSessionOption } from "@/hooks/skills/useDeactivateSessionOption";
 
 import type { SessionDuration, UserSkillSession } from "@/types/types/swaps";
 
-/*
-============================================================
-AVAILABLE DURATIONS
-============================================================
-*/
-
 const DURATIONS: SessionDuration[] = [30, 45, 60, 90, 120];
-
-/*
-============================================================
-PROPS
-============================================================
-*/
 
 interface SessionOptionsManagerProps {
   userSkillId: string;
 }
-
-/*
-============================================================
-COMPONENT
-============================================================
-*/
 
 export default function SessionOptionsManager({
   userSkillId,
@@ -49,38 +28,21 @@ export default function SessionOptionsManager({
   } = useMySessionOptions(userSkillId);
 
   const createMutation = useCreateSessionOption();
-
   const updateMutation = useUpdateSessionOption();
-
   const deactivateMutation = useDeactivateSessionOption();
 
-  /*
-   * Form visibility.
-   */
   const [showForm, setShowForm] = useState(false);
 
-  /*
-   * Editing option.
-   */
   const [editingOption, setEditingOption] = useState<UserSkillSession | null>(
     null,
   );
 
-  /*
-   * Form values.
-   */
   const [durationMinutes, setDurationMinutes] = useState<SessionDuration>(60);
 
   const [tokenRate, setTokenRate] = useState("");
 
-  /*
-   * Local validation error.
-   */
   const [formError, setFormError] = useState("");
 
-  /*
-   * Reset form.
-   */
   const resetForm = () => {
     setDurationMinutes(60);
     setTokenRate("");
@@ -89,49 +51,31 @@ export default function SessionOptionsManager({
     setShowForm(false);
   };
 
-  /*
-   * Start editing.
-   */
   const handleEdit = (option: UserSkillSession) => {
     setEditingOption(option);
-
     setDurationMinutes(option.duration_minutes);
-
     setTokenRate(String(option.token_rate));
-
     setFormError("");
-
     setShowForm(true);
   };
 
-  /*
-   * Submit.
-   */
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setFormError("");
 
-    /*
-     * Validate token rate.
-     */
     const parsedTokenRate = Number(tokenRate);
 
     if (tokenRate.trim() === "" || !Number.isFinite(parsedTokenRate)) {
       setFormError("Please enter a valid token amount.");
-
       return;
     }
 
     if (parsedTokenRate < 0) {
       setFormError("Token amount cannot be negative.");
-
       return;
     }
 
-    /*
-     * CREATE
-     */
     if (!editingOption) {
       const alreadyExists = sessionOptions.some(
         (option) => option.duration_minutes === durationMinutes,
@@ -139,16 +83,13 @@ export default function SessionOptionsManager({
 
       if (alreadyExists) {
         setFormError(`${durationMinutes}-minute session already exists.`);
-
         return;
       }
 
       try {
         await createMutation.mutateAsync({
           userSkillId,
-
           durationMinutes,
-
           tokenRate: parsedTokenRate,
         });
 
@@ -164,17 +105,11 @@ export default function SessionOptionsManager({
       return;
     }
 
-    /*
-     * UPDATE
-     */
     try {
       await updateMutation.mutateAsync({
         sessionOptionId: editingOption.id,
-
         userSkillId,
-
         durationMinutes,
-
         tokenRate: parsedTokenRate,
       });
 
@@ -188,32 +123,33 @@ export default function SessionOptionsManager({
     }
   };
 
-  /*
-   * Deactivate option.
-   */
-  const handleDeactivate = async (option: UserSkillSession) => {
-    const confirmed = window.confirm(
-      `Remove the ${option.duration_minutes}-minute session option? Existing bookings will not be affected.`,
-    );
+  const handleDeactivate = (option: UserSkillSession) => {
+    confirmToast({
+      title: "Remove Session Option",
+      message: `Remove the ${option.duration_minutes}-minute session option? Existing bookings will not be affected.`,
+      confirmText: "Remove",
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          await deactivateMutation.mutateAsync({
+            sessionOptionId: option.id,
+            userSkillId,
+          });
 
-    if (!confirmed) {
-      return;
-    }
+          toast.success("Session option removed successfully.");
+        } catch (error) {
+          console.error(error);
 
-    try {
-      await deactivateMutation.mutateAsync({
-        sessionOptionId: option.id,
-
-        userSkillId,
-      });
-    } catch (error) {
-      console.error(error);
-    }
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to remove session option.",
+          );
+        }
+      },
+    });
   };
 
-  /*
-   * Loading.
-   */
   if (isLoading) {
     return (
       <div className="mt-5 rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4">
@@ -225,9 +161,6 @@ export default function SessionOptionsManager({
     );
   }
 
-  /*
-   * Error.
-   */
   if (isError) {
     return (
       <div className="mt-5 rounded-2xl border border-red-100 bg-red-50 p-4">
@@ -240,10 +173,6 @@ export default function SessionOptionsManager({
 
   return (
     <div className="mt-5 border-t border-gray-100 pt-5">
-      {/* ================================================= */}
-      {/* HEADER */}
-      {/* ================================================= */}
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -275,10 +204,6 @@ export default function SessionOptionsManager({
           </button>
         )}
       </div>
-
-      {/* ================================================= */}
-      {/* EXISTING OPTIONS */}
-      {/* ================================================= */}
 
       {sessionOptions.length > 0 ? (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -344,10 +269,6 @@ export default function SessionOptionsManager({
         </div>
       )}
 
-      {/* ================================================= */}
-      {/* ADD / EDIT FORM */}
-      {/* ================================================= */}
-
       {showForm && (
         <form
           onSubmit={handleSubmit}
@@ -373,10 +294,6 @@ export default function SessionOptionsManager({
               <X size={17} />
             </button>
           </div>
-
-          {/* ================================================= */}
-          {/* DURATION */}
-          {/* ================================================= */}
 
           <div>
             <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -414,10 +331,6 @@ export default function SessionOptionsManager({
             </div>
           </div>
 
-          {/* ================================================= */}
-          {/* TOKEN RATE */}
-          {/* ================================================= */}
-
           <div className="mt-4">
             <label
               htmlFor={`token-rate-${userSkillId}`}
@@ -449,19 +362,11 @@ export default function SessionOptionsManager({
             </p>
           </div>
 
-          {/* ================================================= */}
-          {/* ERROR */}
-          {/* ================================================= */}
-
           {formError && (
             <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
               {formError}
             </div>
           )}
-
-          {/* ================================================= */}
-          {/* BUTTONS */}
-          {/* ================================================= */}
 
           <div className="mt-5 flex justify-end gap-2">
             <button
@@ -486,7 +391,6 @@ export default function SessionOptionsManager({
               ) : (
                 <>
                   <Check size={16} />
-
                   {editingOption ? "Save Changes" : "Add Option"}
                 </>
               )}
