@@ -1,15 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Check, Clock, Coins, X } from "lucide-react";
+import { toast } from "sonner";
 
 import type { SwapRequest } from "@/types/types/swaps";
-
 import { useUpdateSwapRequest } from "@/hooks/skills/useUpdateSwapRequest";
 import { useAcceptSwapRequest } from "@/hooks/skills/useAcceptSwapRequest";
-
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
 
 interface SwapRequestCardProps {
   request: SwapRequest;
@@ -18,12 +17,9 @@ interface SwapRequestCardProps {
 export default function SwapRequestCard({ request }: SwapRequestCardProps) {
   const updateRequest = useUpdateSwapRequest();
   const acceptRequest = useAcceptSwapRequest();
-
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
   const supabase = createClient();
 
-  // Get currently logged-in user's auth ID
   useEffect(() => {
     const getCurrentUser = async () => {
       const {
@@ -37,7 +33,6 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
   }, [supabase]);
 
   const isRequester = currentUserId === request.requester_auth_user_id;
-
   const isMentor = currentUserId === request.mentor_auth_user_id;
 
   const handleReject = async () => {
@@ -47,13 +42,13 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
         status: isRequester ? "cancelled" : "rejected",
       });
 
-      alert(
+      toast.success(
         isRequester
           ? "Swap request cancelled successfully."
           : "Swap request rejected successfully.",
       );
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Failed to update request.",
       );
     }
@@ -63,16 +58,17 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
     try {
       await acceptRequest.mutateAsync(request.id);
 
-      alert("Swap accepted and tokens transferred successfully.");
+      toast.success("Swap accepted and tokens transferred successfully.");
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to accept swap.");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to accept swap.",
+      );
     }
   };
 
   return (
     <article className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-5 md:flex-row md:items-center">
-        {/* Requester */}
         <div className="flex flex-1 items-center gap-4">
           <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-gray-100">
             <Image
@@ -98,7 +94,6 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
           </div>
         </div>
 
-        {/* Status */}
         <div>
           {request.status === "pending" ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-yellow-50 px-3 py-1.5 text-xs font-semibold text-yellow-700">
@@ -119,7 +114,6 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
         </div>
       </div>
 
-      {/* Message */}
       {request.message && (
         <div className="mt-5 rounded-xl bg-[#F7F7FF] p-4">
           <p className="text-sm leading-6 text-[#53617A]">
@@ -128,7 +122,6 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
         </div>
       )}
 
-      {/* Details */}
       <div className="mt-5 flex flex-wrap gap-3">
         <span className="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-600">
           {request.proficiency_level}
@@ -140,11 +133,8 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
         </span>
       </div>
 
-      {/* Actions */}
       {request.status === "pending" && currentUserId && (
         <div className="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-5">
-          {/* Requester:
-              Only show Reject/Cancel */}
           {isRequester && (
             <button
               type="button"
@@ -153,13 +143,10 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
               className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <X size={16} />
-
               {updateRequest.isPending ? "Cancelling..." : "Reject"}
             </button>
           )}
 
-          {/* Mentor:
-              Show Reject + Accept */}
           {isMentor && (
             <>
               <button
@@ -169,7 +156,6 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
                 className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <X size={16} />
-
                 {updateRequest.isPending ? "Rejecting..." : "Reject"}
               </button>
 
@@ -180,7 +166,6 @@ export default function SwapRequestCard({ request }: SwapRequestCardProps) {
                 className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Check size={16} />
-
                 {acceptRequest.isPending ? "Accepting..." : "Accept"}
               </button>
             </>

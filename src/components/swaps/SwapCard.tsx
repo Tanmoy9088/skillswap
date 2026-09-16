@@ -20,6 +20,7 @@ import { useCancelSwapSession } from "@/hooks/skills/useCancelSwapSession";
 import { useSwapRating } from "@/hooks/skills/useSwapRating";
 
 import type { Swap } from "@/types/types/swaps";
+import { toast } from "sonner";
 
 interface SwapCardProps {
   swap: Swap;
@@ -106,9 +107,9 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
     try {
       await startSession.mutateAsync(swap.id);
 
-      alert("Session started successfully!");
+      toast.success("Session started successfully!");
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Failed to start session.",
       );
     }
@@ -146,9 +147,9 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
     try {
       await cancelSession.mutateAsync(swap.id);
 
-      alert("Session cancelled successfully!");
+      toast.success("Session cancelled successfully!");
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Failed to cancel session.",
       );
     }
@@ -170,9 +171,9 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
     try {
       await confirmSchedule.mutateAsync(swap.id);
 
-      alert("Session confirmed successfully!");
+      toast.success("Session confirmed successfully!");
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Failed to confirm session.",
       );
     }
@@ -197,9 +198,9 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
         accept: true,
       });
 
-      alert("New session time accepted!");
+      toast.success("New session time accepted!");
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to accept the new time.",
@@ -228,9 +229,9 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
         accept: false,
       });
 
-      alert("New time rejected. You can request another session time.");
+      toast.success("New time rejected. You can request another session time.");
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to reject the new time.",
@@ -248,9 +249,9 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
     try {
       await completeSession.mutateAsync(swap.id);
 
-      alert("Session completed successfully!");
+      toast.success("Session completed successfully!");
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Failed to complete session.",
       );
     }

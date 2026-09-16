@@ -9,6 +9,7 @@ import ScheduleSessionConfirmation from "./ScheduleSessionConfirmation";
 import ScheduleSessionHeader from "./ScheduleSessionHeader";
 import ScheduleSessionOptions from "./ScheduleSessionOptions";
 import { DAYS, formatTime, timeToMinutes } from "./ScheduleSessionUtils";
+import { toast } from "sonner";
 interface ScheduleSessionModalProps {
   swapId: string;
   skillName: string;
@@ -140,51 +141,51 @@ const ScheduleSessionModal = ({
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedSessionOptionId) {
-      alert("Please select a session option.");
+      toast.error("Please select a session option.");
       return;
     }
     if (!selectedSessionOption) {
-      alert("The selected session option is no longer available.");
+      toast.error("The selected session option is no longer available.");
       return;
     }
     if (!date || !time) {
-      alert("Please select a date and time.");
+      toast.error("Please select a date and time.");
       return;
     }
     if (selectedAvailability.length === 0) {
-      alert("The mentor is not available on the selected date.");
+      toast.error("The mentor is not available on the selected date.");
       return;
     }
     if (!isTimeWithinAvailability(time)) {
-      alert(
+      toast.error(
         `The ${selectedSessionOption.duration_minutes}-minute session does not fit inside the mentor's availability. Available: ${availabilityText}`,
       );
       return;
     }
     const scheduledAt = createScheduledAt();
     if (!scheduledAt) {
-      alert("Invalid date or time.");
+      toast.error("Invalid date or time.");
       return;
     }
     if (scheduledAt.getTime() <= currentTime) {
-      alert("Please choose a future date and time.");
+      toast.error("Please choose a future date and time.");
       return;
     }
     setIsConfirming(true);
   };
   const handleConfirm = async () => {
     if (!selectedSessionOption) {
-      alert("Please select a session option.");
+      toast.error("Please select a session option.");
       setIsConfirming(false);
       return;
     }
     if (!date || !time) {
-      alert("Please select a date and time.");
+      toast.error("Please select a date and time.");
       setIsConfirming(false);
       return;
     }
     if (!isTimeWithinAvailability(time)) {
-      alert(
+      toast.error(
         `The selected session does not fit inside the mentor's availability: ${availabilityText}`,
       );
       setIsConfirming(false);
@@ -192,12 +193,12 @@ const ScheduleSessionModal = ({
     }
     const scheduledAt = createScheduledAt();
     if (!scheduledAt) {
-      alert("Invalid date or time.");
+      toast.error("Invalid date or time.");
       setIsConfirming(false);
       return;
     }
     if (scheduledAt.getTime() <= Date.now()) {
-      alert("Please choose a future date and time.");
+      toast.error("Please choose a future date and time.");
       setIsConfirming(false);
       return;
     }
@@ -207,10 +208,10 @@ const ScheduleSessionModal = ({
         sessionOptionId: selectedSessionOption.id,
         scheduledAt: scheduledAt.toISOString(),
       });
-      alert("Session scheduling request sent successfully.");
+      toast.success("Session scheduling request sent successfully.");
       onClose();
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Failed to schedule session.",
       );
     }

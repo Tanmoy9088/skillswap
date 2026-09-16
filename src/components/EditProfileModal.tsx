@@ -3,12 +3,13 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ImagePlus, X } from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
 
 import { useCurrentProfile } from "@/hooks/use-current-profile";
 import { useUpdateProfile } from "@/hooks/useUpdateProfile";
 import { useGlobalStore } from "@/store/globalState";
 import { uploadProfileImage } from "@/lib/uploadProfileImage";
-import Image from "next/image";
 
 interface EditProfileFormData {
   name: string;
@@ -17,33 +18,20 @@ interface EditProfileFormData {
 }
 
 const EditProfileModal = () => {
-  // Modal state
   const isOpen = useGlobalStore((state) => state.isEditProfileOpen);
-
   const closeEditProfile = useGlobalStore((state) => state.closeEditProfile);
-
-  // Image state from Zustand
   const selectedImage = useGlobalStore((state) => state.selectedImage);
-
   const setSelectedImage = useGlobalStore((state) => state.setSelectedImage);
-
   const preview = useGlobalStore((state) => state.preview);
-
   const setPreview = useGlobalStore((state) => state.setPreview);
-
   const isUploadingImage = useGlobalStore((state) => state.isUploadingImage);
-
   const setIsUploadingImage = useGlobalStore(
     (state) => state.setIsUploadingImage,
   );
 
-  // Profile
   const { data: profile } = useCurrentProfile();
-
-  // Update mutation
   const { mutate: updateProfile, isPending } = useUpdateProfile();
 
-  // React Hook Form
   const {
     register,
     handleSubmit,
@@ -51,7 +39,6 @@ const EditProfileModal = () => {
     formState: { errors },
   } = useForm<EditProfileFormData>();
 
-  // Fill form with existing profile data
   useEffect(() => {
     if (profile && isOpen) {
       reset({
@@ -65,49 +52,39 @@ const EditProfileModal = () => {
     }
   }, [profile, isOpen, reset, setPreview, setSelectedImage]);
 
-  // Handle image selection
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
 
-    // Check image type
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file");
+      toast.error("Please select a valid image file");
       return;
     }
 
-    // Optional size validation (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image size must be less than 5MB");
+      toast.error("Image size must be less than 5MB");
       return;
     }
 
     setSelectedImage(file);
 
-    // Create local preview
     const imageUrl = URL.createObjectURL(file);
 
     setPreview(imageUrl);
   };
 
-  // Close modal
   const handleClose = () => {
     reset();
-
     setSelectedImage(null);
-
     setPreview("");
-
     closeEditProfile();
   };
 
-  // Submit form
   const onSubmit = async (data: EditProfileFormData) => {
     try {
       let profileImage = profile?.profile_img || "";
 
-      // Upload new image
       if (selectedImage && profile?.auth_user_id) {
         setIsUploadingImage(true);
 
@@ -119,7 +96,6 @@ const EditProfileModal = () => {
         setIsUploadingImage(false);
       }
 
-      // Update profile
       updateProfile(
         {
           name: data.name,
@@ -130,25 +106,21 @@ const EditProfileModal = () => {
         {
           onSuccess: () => {
             setSelectedImage(null);
-
             closeEditProfile();
           },
-
           onError: (error) => {
             console.error("Profile update error:", error.message);
+            toast.error(error.message || "Failed to update profile");
           },
         },
       );
     } catch (error) {
       setIsUploadingImage(false);
-
       console.error("Image upload error:", error);
-
-      alert("Failed to update profile");
+      toast.error("Failed to update profile");
     }
   };
 
-  // Don't render if modal is closed
   if (!isOpen) {
     return null;
   }
@@ -157,12 +129,9 @@ const EditProfileModal = () => {
 
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
-      {/* Overlay */}
       <div onClick={handleClose} className="absolute inset-0 bg-black/50" />
 
-      {/* Modal */}
       <div className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold">Edit Profile</h2>
@@ -183,15 +152,16 @@ const EditProfileModal = () => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Profile Image */}
           <div className="flex flex-col items-center">
             {preview ? (
-              <Image
-                src={preview}
-                alt="Profile preview"
-                className="h-28 w-28 rounded-full border object-cover"
-                fill
-              />
+              <div className="relative h-28 w-28">
+                <Image
+                  src={preview}
+                  alt="Profile preview"
+                  className="rounded-full border object-cover"
+                  fill
+                />
+              </div>
             ) : (
               <div className="flex h-28 w-28 items-center justify-center rounded-full bg-indigo-200 text-4xl font-bold text-indigo-700">
                 {profile?.name?.charAt(0)?.toUpperCase()}
@@ -214,7 +184,6 @@ const EditProfileModal = () => {
             )}
           </div>
 
-          {/* Name */}
           <div>
             <label className="mb-2 block font-medium">Name</label>
 
@@ -230,7 +199,6 @@ const EditProfileModal = () => {
             )}
           </div>
 
-          {/* Phone */}
           <div>
             <label className="mb-2 block font-medium">Phone</label>
 
@@ -241,7 +209,6 @@ const EditProfileModal = () => {
             />
           </div>
 
-          {/* Bio */}
           <div>
             <label className="mb-2 block font-medium">Bio</label>
 
@@ -253,7 +220,6 @@ const EditProfileModal = () => {
             />
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-3 pt-3">
             <button
               type="button"

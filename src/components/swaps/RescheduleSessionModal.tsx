@@ -2,11 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
 import { getMentorAvailability } from "@/lib/mentorAvailability";
 import { useProposeSwapReschedule } from "@/hooks/skills/useProposeSwapReschedule";
+
 import RescheduleSessionForm from "./ReScheduleSessionForm";
 import RescheduleSessionHeader from "./ReScheduleSessionHeader";
 import RescheduleSessionReview from "./ReScheduleSessionReview";
+
 import {
   DAYS,
   formatTime,
@@ -150,22 +154,22 @@ const RescheduleSessionModal = ({
     }
 
     if (availabilityError) {
-      alert(availabilityError);
+      toast.error(availabilityError);
       return;
     }
 
     if (!date || !time) {
-      alert("Please select a date and time.");
+      toast.error("Please select a date and time.");
       return;
     }
 
     if (selectedAvailability.length === 0) {
-      alert("The mentor is not available on the selected date.");
+      toast.error("The mentor is not available on the selected date.");
       return;
     }
 
     if (!isTimeWithinAvailability(time, selectedAvailability)) {
-      alert(
+      toast.error(
         `Please choose a time within the mentor's availability: ${availabilityText}`,
       );
       return;
@@ -174,12 +178,12 @@ const RescheduleSessionModal = ({
     const proposedAt = createProposedAt();
 
     if (!proposedAt) {
-      alert("Invalid date or time.");
+      toast.error("Invalid date or time.");
       return;
     }
 
     if (proposedAt.getTime() <= Date.now()) {
-      alert("Please choose a future date and time.");
+      toast.error("Please choose a future date and time.");
       return;
     }
 
@@ -198,22 +202,20 @@ const RescheduleSessionModal = ({
     const proposedAt = createProposedAt();
 
     if (!proposedAt) {
-      alert("Invalid date or time.");
+      toast.error("Invalid date or time.");
       return;
     }
 
     if (!isTimeWithinAvailability(time, selectedAvailability)) {
-      alert(
+      toast.error(
         `The selected time is outside the mentor's availability: ${availabilityText}`,
       );
-
       setStep("select");
       return;
     }
 
     if (proposedAt.getTime() <= Date.now()) {
-      alert("Please choose a future date and time.");
-
+      toast.error("Please choose a future date and time.");
       setStep("select");
       return;
     }
@@ -225,10 +227,10 @@ const RescheduleSessionModal = ({
         note: note.trim() || undefined,
       });
 
-      alert("New session time proposed successfully.");
+      toast.success("New session time proposed successfully.");
       onClose();
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to suggest another time.",

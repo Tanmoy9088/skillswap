@@ -33,18 +33,14 @@ interface GlobalState {
 
   isSwapRequestOpen: boolean;
   selectedSwapSkillId: string | null;
-
   openSwapRequest: (skillId?: string) => void;
   closeSwapRequest: () => void;
   setSelectedSwapSkillId: (skillId: string) => void;
 }
 
 export const useGlobalStore = create<GlobalState>((set) => ({
-  // Profile
+  // Profile modal
   isProfileOpen: false,
-  isSwapRequestOpen: false,
-
-  selectedSwapSkillId: null,
 
   openProfile: () =>
     set({
@@ -56,7 +52,7 @@ export const useGlobalStore = create<GlobalState>((set) => ({
       isProfileOpen: false,
     }),
 
-  // Edit Profile
+  // Edit profile modal
   isEditProfileOpen: false,
 
   openEditProfile: () =>
@@ -69,9 +65,8 @@ export const useGlobalStore = create<GlobalState>((set) => ({
       isEditProfileOpen: false,
     }),
 
-  // Add Skill
+  // Add skill modal
   isAddSkillOpen: false,
-
   skillType: "offered",
 
   openAddSkill: (type) =>
@@ -85,7 +80,7 @@ export const useGlobalStore = create<GlobalState>((set) => ({
       isAddSkillOpen: false,
     }),
 
-  // Image upload loading
+  // Image upload
   isUploadingImage: false,
 
   setIsUploadingImage: (value) =>
@@ -101,13 +96,18 @@ export const useGlobalStore = create<GlobalState>((set) => ({
       selectedImage: file,
     }),
 
-  // Preview
+  // Image preview
   preview: "",
 
   setPreview: (value) =>
     set({
       preview: value,
     }),
+
+  // Swap request modal
+  isSwapRequestOpen: false,
+  selectedSwapSkillId: null,
+
   openSwapRequest: (skillId) =>
     set({
       isSwapRequestOpen: true,

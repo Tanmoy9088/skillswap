@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Star, X } from "lucide-react";
+import { toast } from "sonner";
 
 import { useCreateSwapRating } from "@/hooks/skills/useCreateSwapRating";
 import { useUpdateSwapRating } from "@/hooks/skills/useUpdateSwapRating";
@@ -23,23 +24,20 @@ const RateMentorModal = ({
   onClose,
 }: RateMentorModalProps) => {
   const [rating, setRating] = useState(existingRating?.rating ?? 0);
-
   const [hoverRating, setHoverRating] = useState(0);
-
   const [review, setReview] = useState(existingRating?.review ?? "");
 
   const createRating = useCreateSwapRating();
   const updateRating = useUpdateSwapRating();
 
   const isEditing = Boolean(existingRating);
-
   const isPending = createRating.isPending || updateRating.isPending;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (rating === 0) {
-      alert("Please select a rating.");
+      toast.error("Please select a rating.");
       return;
     }
 
@@ -51,7 +49,7 @@ const RateMentorModal = ({
           review: review.trim() || undefined,
         });
 
-        alert("Rating updated successfully!");
+        toast.success("Rating updated successfully!");
       } else {
         await createRating.mutateAsync({
           swapId,
@@ -59,12 +57,12 @@ const RateMentorModal = ({
           review: review.trim() || undefined,
         });
 
-        alert("Rating submitted successfully!");
+        toast.success("Rating submitted successfully!");
       }
 
       onClose();
     } catch (error) {
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : isEditing
@@ -90,7 +88,6 @@ const RateMentorModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">
@@ -113,9 +110,7 @@ const RateMentorModal = ({
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="mt-6">
-          {/* Rating */}
           <div>
             <p className="text-sm font-semibold text-gray-700">
               How was your session?
@@ -155,7 +150,6 @@ const RateMentorModal = ({
             )}
           </div>
 
-          {/* Review */}
           <div className="mt-6">
             <label
               htmlFor="review"
@@ -181,7 +175,6 @@ const RateMentorModal = ({
             </p>
           </div>
 
-          {/* Buttons */}
           <div className="mt-6 flex gap-3">
             <button
               type="button"

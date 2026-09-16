@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -40,11 +41,12 @@ const LoginPage = () => {
         const profile = await getCurrentProfile();
 
         if (profile?.role === "admin") {
+          toast.success("Login successful");
           router.push("/admin/dashboard");
         } else {
+          toast.success("Login successful");
           router.push("/");
         }
-
         reset();
       },
     });
@@ -82,15 +84,15 @@ const LoginPage = () => {
               </h1>
 
               <p className="mt-6 max-w-md text-base leading-7 text-indigo-100">
-                Connect with people who can teach what you want to learn,
-                while sharing the skills you already have.
+                Connect with people who can teach what you want to learn, while
+                sharing the skills you already have.
               </p>
             </div>
 
             <div className="relative z-10 rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md">
               <p className="text-sm leading-6 text-indigo-50">
-                “Everyone has something valuable to teach, and something new
-                to learn.”
+                “Everyone has something valuable to teach, and something new to
+                learn.”
               </p>
             </div>
           </div>
@@ -178,11 +180,7 @@ const LoginPage = () => {
                         showPassword ? "Hide password" : "Show password"
                       }
                     >
-                      {showPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
 

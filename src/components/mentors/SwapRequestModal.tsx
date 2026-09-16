@@ -3,6 +3,8 @@
 import { useEffect, useMemo } from "react";
 import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import { useGlobalStore } from "@/store/globalState";
 import { useCreateSwapRequest } from "@/hooks/skills/useCreateSwapRequest";
 import type { MentorSkill } from "@/types/types/skills";
@@ -80,7 +82,7 @@ export default function SwapRequestModal({
     );
 
     if (!selectedSkill) {
-      alert("Please select a valid skill.");
+      toast.error("Please select a valid skill.");
       return;
     }
 
@@ -99,11 +101,13 @@ export default function SwapRequestModal({
       setSelectedSwapSkillId("");
       closeSwapRequest();
 
-      alert(`${selectedSkill.skill_name} swap request sent successfully!`);
+      toast.success(
+        `${selectedSkill.skill_name} swap request sent successfully!`,
+      );
     } catch (error) {
       console.error("Failed to send swap request:", error);
 
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Failed to send swap request.",
       );
     }
