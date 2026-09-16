@@ -13,6 +13,8 @@ import SwapCardHeader from "@/components/swaps/SwapCardHeader";
 import SwapCardUser from "@/components/swaps/SwapCardUser";
 import SwapCardStatusContent from "@/components/swaps/SwapCardStatusContent";
 
+import { confirmToast } from "@/components/lib/confirmToast";
+
 import { useConfirmScheduleSwap } from "@/hooks/skills/useConfirmScheduleSwap";
 import { useRespondToReschedule } from "@/hooks/skills/useRespondToReschedule";
 import { useStartSwapSession } from "@/hooks/skills/useStartSwapSession";
@@ -58,43 +60,6 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
 
   const otherUserRole = isLearner ? "Mentor" : "Learner";
 
-  const showConfirmation = (
-    message: string,
-    onConfirm: () => void | Promise<void>,
-  ) => {
-    toast.custom(
-      (toastId) => (
-        <div className="w-90 rounded-xl border border-gray-200 bg-white p-4 shadow-xl">
-          <p className="text-sm font-medium text-gray-900">{message}</p>
-
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => toast.dismiss(toastId)}
-              className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              onClick={async () => {
-                toast.dismiss(toastId);
-                await onConfirm();
-              }}
-              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      ),
-      {
-        duration: Infinity,
-      },
-    );
-  };
-
   const handleStartSession = async () => {
     if (!isMentor) {
       return;
@@ -120,9 +85,12 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
   };
 
   const handleCancelSession = () => {
-    showConfirmation(
-      "Are you sure you want to cancel this session?",
-      async () => {
+    confirmToast({
+      title: "Cancel Session",
+      message: "Are you sure you want to cancel this session?",
+      confirmText: "Cancel Session",
+      variant: "danger",
+      onConfirm: async () => {
         try {
           await cancelSession.mutateAsync(swap.id);
 
@@ -135,46 +103,62 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
           );
         }
       },
-    );
+    });
   };
 
   const handleConfirmSchedule = () => {
-    showConfirmation("Confirm this requested session time?", async () => {
-      try {
-        await confirmSchedule.mutateAsync(swap.id);
+    confirmToast({
+      title: "Confirm Session",
+      message: "Confirm this requested session time?",
+      confirmText: "Confirm",
+      onConfirm: async () => {
+        try {
+          await confirmSchedule.mutateAsync(swap.id);
 
-        toast.success("Session confirmed successfully!");
-      } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Failed to confirm session.",
-        );
-      }
+          toast.success("Session confirmed successfully!");
+        } catch (error) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to confirm session.",
+          );
+        }
+      },
     });
   };
 
   const handleAcceptReschedule = () => {
-    showConfirmation("Accept this new session time?", async () => {
-      try {
-        await respondToReschedule.mutateAsync({
-          swapId: swap.id,
-          accept: true,
-        });
+    confirmToast({
+      title: "Accept New Time",
+      message: "Accept this new session time?",
+      confirmText: "Accept",
+      onConfirm: async () => {
+        try {
+          await respondToReschedule.mutateAsync({
+            swapId: swap.id,
+            accept: true,
+          });
 
-        toast.success("New session time accepted!");
-      } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Failed to accept the new time.",
-        );
-      }
+          toast.success("New session time accepted!");
+        } catch (error) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to accept the new time.",
+          );
+        }
+      },
     });
   };
 
   const handleRejectReschedule = () => {
-    showConfirmation(
-      "Reject this proposed time? You will be able to request another time.",
-      async () => {
+    confirmToast({
+      title: "Reject New Time",
+      message:
+        "Reject this proposed time? You will be able to request another time.",
+      confirmText: "Reject",
+      variant: "danger",
+      onConfirm: async () => {
         try {
           await respondToReschedule.mutateAsync({
             swapId: swap.id,
@@ -192,7 +176,7 @@ const SwapCard = ({ swap, currentUserId }: SwapCardProps) => {
           );
         }
       },
-    );
+    });
   };
 
   const handleCompleteSession = async () => {
