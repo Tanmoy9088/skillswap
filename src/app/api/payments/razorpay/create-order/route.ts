@@ -120,6 +120,7 @@ export async function POST(request: Request) {
           error instanceof Error
             ? error.message
             : "Failed to create Razorpay order.",
+        error: error,
       },
       {
         status: 500,
