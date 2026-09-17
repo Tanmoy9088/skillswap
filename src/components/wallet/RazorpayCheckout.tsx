@@ -80,7 +80,6 @@ const loadRazorpayScript = (): Promise<boolean> => {
 
 export default function RazorpayCheckout({
   packageId,
-  packageName,
   tokens,
   priceInr,
   userName,
