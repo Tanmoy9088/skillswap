@@ -1,22 +1,21 @@
 "use client";
 
+import NotificationBell from "@/components/notifications/NotificationBell";
 import ProfileModal from "@/components/ProfileModal";
 import { useCurrentProfile } from "@/hooks/use-current-profile";
+import { useNotificationRealtime } from "@/hooks/notifications/useNotificationRealtime";
 import { useGlobalStore } from "@/store/globalState";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import {
-  ChevronDown,
-  Menu,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { ChevronDown, Menu, Sparkles, X } from "lucide-react";
 
 const Header = () => {
   const pathname = usePathname();
   const { data: profile, isLoading } = useCurrentProfile();
+
+  useNotificationRealtime(profile?.auth_user_id);
 
   const [showHeader, setShowHeader] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,10 +47,6 @@ const Header = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   setMobileMenuOpen(false);
-  // }, [pathname]);
-
   const publicLinks = [
     { name: "Home", href: "/" },
     { name: "How It Works", href: "/how-it-works" },
@@ -73,10 +68,11 @@ const Header = () => {
   const links = profile ? authenticatedLinks : publicLinks;
 
   const isLinkActive = (href: string) =>
-    pathname === href ||
-    (href !== "/" && pathname.startsWith(`${href}/`));
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
-  const handleMobileLinkClick = () => setMobileMenuOpen(false);
+  const handleMobileLinkClick = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -87,9 +83,7 @@ const Header = () => {
       >
         <div className="mx-auto mt-3 max-w-375 px-3 sm:px-5 lg:px-8">
           <div className="relative rounded-2xl border border-white/70 bg-white/90 shadow-[0_8px_30px_rgba(79,70,229,0.08)] backdrop-blur-xl">
-            {/* Main Header */}
             <div className="flex h-18 items-center px-4 sm:px-6">
-              {/* Logo */}
               <Link
                 href="/"
                 className="group flex shrink-0 items-center gap-2.5"
@@ -111,7 +105,6 @@ const Header = () => {
                 </div>
               </Link>
 
-              {/* Desktop Navigation */}
               <nav className="mx-auto hidden items-center gap-1 xl:flex">
                 {links.map((link) => {
                   const isActive = isLinkActive(link.href);
@@ -136,7 +129,6 @@ const Header = () => {
                 })}
               </nav>
 
-              {/* Desktop Right Side */}
               <div className="ml-auto hidden shrink-0 items-center gap-3 xl:flex">
                 {isLoading ? (
                   <>
@@ -144,39 +136,43 @@ const Header = () => {
                     <div className="h-11 w-11 animate-pulse rounded-full bg-gray-100" />
                   </>
                 ) : profile ? (
-                  <button
-                    type="button"
-                    onClick={openProfile}
-                    className="group flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50/80 p-1.5 pr-3 transition-all duration-200 hover:border-indigo-100 hover:bg-indigo-50/60 hover:shadow-md hover:shadow-indigo-100"
-                  >
-                    <div className="relative">
-                      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-indigo-500 to-violet-500 p-0.5">
-                        <div className="h-full w-full overflow-hidden rounded-full bg-white">
-                          <Image
-                            src={profile.profile_img || "/image.png"}
-                            alt={profile.name}
-                            width={40}
-                            height={40}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
+                  <>
+                    <NotificationBell />
+
+                    <button
+                      type="button"
+                      onClick={openProfile}
+                      className="group flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50/80 p-1.5 pr-3 transition-all duration-200 hover:border-indigo-100 hover:bg-indigo-50/60 hover:shadow-md hover:shadow-indigo-100"
+                    >
+                      <div className="relative">
+                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-indigo-500 to-violet-500 p-0.5">
+                          <div className="h-full w-full overflow-hidden rounded-full bg-white">
+                            <Image
+                              src={profile.profile_img || "/image.png"}
+                              alt={profile.name}
+                              width={40}
+                              height={40}
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
                         </div>
+
+                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                       </div>
 
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
-                    </div>
+                      <div className="max-w-37.5 text-left">
+                        <p className="truncate text-sm font-bold text-gray-900">
+                          {profile.name}
+                        </p>
 
-                    <div className="max-w-37.5 text-left">
-                      <p className="truncate text-sm font-bold text-gray-900">
-                        {profile.name}
-                      </p>
+                        <p className="truncate text-[11px] text-gray-400">
+                          {profile.email}
+                        </p>
+                      </div>
 
-                      <p className="truncate text-[11px] text-gray-400">
-                        {profile.email}
-                      </p>
-                    </div>
-
-                    <ChevronDown className="h-4 w-4 text-gray-400 transition-colors group-hover:text-indigo-500" />
-                  </button>
+                      <ChevronDown className="h-4 w-4 text-gray-400 transition-colors group-hover:text-indigo-500" />
+                    </button>
+                  </>
                 ) : (
                   <>
                     <Link
@@ -199,8 +195,9 @@ const Header = () => {
                 )}
               </div>
 
-              {/* Mobile Right Side */}
               <div className="ml-auto flex items-center gap-2 xl:hidden">
+                {profile && !isLoading && <NotificationBell />}
+
                 {profile && !isLoading && (
                   <button
                     type="button"
@@ -227,7 +224,9 @@ const Header = () => {
                   onClick={() => setMobileMenuOpen((prev) => !prev)}
                   className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                   aria-label={
-                    mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
+                    mobileMenuOpen
+                      ? "Close navigation menu"
+                      : "Open navigation menu"
                   }
                   aria-expanded={mobileMenuOpen}
                 >
@@ -240,7 +239,6 @@ const Header = () => {
               </div>
             </div>
 
-            {/* Mobile Navigation */}
             {mobileMenuOpen && (
               <div className="border-t border-gray-100 px-4 pb-4 pt-3 xl:hidden">
                 <nav className="flex flex-col gap-1">
@@ -268,7 +266,6 @@ const Header = () => {
                   })}
                 </nav>
 
-                {/* Mobile Auth */}
                 {!profile && !isLoading && (
                   <div className="mt-3 grid grid-cols-2 gap-2 border-t border-gray-100 pt-3">
                     <Link
@@ -287,7 +284,6 @@ const Header = () => {
                   </div>
                 )}
 
-                {/* Mobile Profile */}
                 {profile && !isLoading && (
                   <button
                     type="button"
