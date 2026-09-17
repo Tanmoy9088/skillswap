@@ -45,11 +45,10 @@ export const getMyTokenBalance = async (): Promise<number> => {
 export const getMyTokenTransactions = async (): Promise<TokenTransaction[]> => {
   const supabase = createClient();
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
+  // const {
+  //   data: { user },
+  //   error: userError,
+  // } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
     .from("token_transactions")
@@ -57,7 +56,6 @@ export const getMyTokenTransactions = async (): Promise<TokenTransaction[]> => {
       "id, user_auth_user_id, amount, transaction_type, swap_id, description, created_at",
     )
     .order("created_at", { ascending: false });
-
 
   if (error) {
     throw new Error(error.message);

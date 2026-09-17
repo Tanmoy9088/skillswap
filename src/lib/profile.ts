@@ -12,17 +12,10 @@ export interface AddSkillPayload {
   skill_type: "offered" | "wanted";
   proficiency_level?: "Beginner" | "Intermediate" | "Advanced" | "Expert";
   description?: string;
-  token_rate?: number;
   image?: File | null;
 }
 
 const supabase = createClient();
-
-/*
-|--------------------------------------------------------------------------
-| Get Current Profile
-|--------------------------------------------------------------------------
-*/
 
 export const getCurrentProfile = async () => {
   const {
@@ -50,12 +43,6 @@ export const getCurrentProfile = async () => {
 
   return profile;
 };
-
-/*
-|--------------------------------------------------------------------------
-| Update Profile
-|--------------------------------------------------------------------------
-*/
 
 export const updateProfile = async (payload: UpdateProfilePayload) => {
   const {
@@ -90,18 +77,6 @@ export const updateProfile = async (payload: UpdateProfilePayload) => {
   return data;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Get User Skills
-|--------------------------------------------------------------------------
-|
-| user_skills = user's relationship with a skill
-|
-| skills = admin-controlled master skill
-|
-|--------------------------------------------------------------------------
-*/
-
 export const getUserSkills = async () => {
   const {
     data: { user },
@@ -116,9 +91,6 @@ export const getUserSkills = async () => {
     throw new Error("User not authenticated");
   }
 
-  /**
-   * Get user's profile
-   */
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id")
@@ -129,10 +101,6 @@ export const getUserSkills = async () => {
     throw new Error(profileError.message);
   }
 
-  /**
-   * Get user's skills and the related
-   * admin-created master skill.
-   */
   const { data, error } = await supabase
     .from("user_skills")
     .select(
@@ -143,7 +111,6 @@ export const getUserSkills = async () => {
       skill_type,
       proficiency_level,
       description,
-      token_rate,
       image_url,
       created_at,
       skills (
@@ -173,25 +140,7 @@ export const getUserSkills = async () => {
   }));
 };
 
-/*
-|--------------------------------------------------------------------------
-| Add User Skill
-|--------------------------------------------------------------------------
-|
-| The user selects an existing skill from the
-| admin-created skills table.
-|
-| The user does NOT create the master skill.
-|
-| The user CAN upload their own course image.
-|
-|--------------------------------------------------------------------------
-*/
-
 export const addSkill = async (payload: AddSkillPayload) => {
-  /*
-   * Get authenticated user
-   */
   const {
     data: { user },
     error: userError,
@@ -205,9 +154,6 @@ export const addSkill = async (payload: AddSkillPayload) => {
     throw new Error("User not authenticated");
   }
 
-  /*
-   * Get user's profile
-   */
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id")
@@ -222,10 +168,6 @@ export const addSkill = async (payload: AddSkillPayload) => {
     throw new Error("Profile not found");
   }
 
-  /*
-   * Verify that the selected master skill exists
-   * and is active.
-   */
   const { data: skill, error: skillError } = await supabase
     .from("skills")
     .select("id, name, is_active")
@@ -241,22 +183,6 @@ export const addSkill = async (payload: AddSkillPayload) => {
     throw new Error("The selected skill is no longer available.");
   }
 
-  /*
-   * Check whether the user has already added
-   * this skill with the same type.
-   *
-   * Example:
-   *
-   * React -> offered
-   *
-   * Cannot add:
-   *
-   * React -> offered
-   *
-   * But can add:
-   *
-   * React -> wanted
-   */
   const { data: existingSkill, error: existingSkillError } = await supabase
     .from("user_skills")
     .select("id")
@@ -273,60 +199,23 @@ export const addSkill = async (payload: AddSkillPayload) => {
     throw new Error("You have already added this skill.");
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Upload User Course Image
-  |--------------------------------------------------------------------------
-  |
-  | Admin image:
-  |
-  | skill-images/admin/...
-  |
-  | User course image:
-  |
-  | skill-images/users/<profile-id>/...
-  |
-  |--------------------------------------------------------------------------
-  */
-
   let imageUrl: string | null = null;
   let imagePath: string | null = null;
 
   if (payload.image) {
-    /*
-     * Validate image type
-     */
     if (!payload.image.type.startsWith("image/")) {
       throw new Error("Please upload a valid image.");
     }
 
-    /*
-     * Maximum 5MB
-     */
     if (payload.image.size > 5 * 1024 * 1024) {
       throw new Error("Image size must be less than 5MB.");
     }
 
-    /*
-     * Get extension
-     */
     const extension =
       payload.image.name.split(".").pop()?.toLowerCase() || "jpg";
 
-    /*
-     * Create user-specific path
-     *
-     * Example:
-     *
-     * users/
-     *   profile-id/
-     *     uuid.jpg
-     */
     imagePath = `users/${profile.id}/${crypto.randomUUID()}.${extension}`;
 
-    /*
-     * Upload image
-     */
     const { error: uploadError } = await supabase.storage
       .from("skill-images")
       .upload(imagePath, payload.image, {
@@ -339,9 +228,6 @@ export const addSkill = async (payload: AddSkillPayload) => {
       throw new Error(`Failed to upload course image: ${uploadError.message}`);
     }
 
-    /*
-     * Get public URL
-     */
     const { data: publicUrlData } = supabase.storage
       .from("skill-images")
       .getPublicUrl(imagePath);
@@ -349,35 +235,14 @@ export const addSkill = async (payload: AddSkillPayload) => {
     imageUrl = publicUrlData.publicUrl;
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Create User Skill Relationship
-  |--------------------------------------------------------------------------
-  */
-
   const { data, error } = await supabase
     .from("user_skills")
     .insert({
       user_id: profile.id,
       skill_id: payload.skill_id,
       skill_type: payload.skill_type,
-
       proficiency_level: payload.proficiency_level ?? "Beginner",
-
       description: payload.description?.trim() || null,
-
-      /*
-       * Token rate only applies when
-       * the user offers the skill.
-       */
-      token_rate:
-        payload.skill_type === "offered" ? (payload.token_rate ?? 1) : null,
-
-      /*
-       * This is the USER'S course image.
-       *
-       * It is NOT the admin master image.
-       */
       image_url: imageUrl,
     })
     .select(
@@ -388,7 +253,6 @@ export const addSkill = async (payload: AddSkillPayload) => {
       skill_type,
       proficiency_level,
       description,
-      token_rate,
       image_url,
       created_at,
       skills (
@@ -403,11 +267,6 @@ export const addSkill = async (payload: AddSkillPayload) => {
     )
     .single();
 
-  /*
-   * If database insertion fails after image upload,
-   * remove the uploaded image so we don't leave
-   * unused files in Storage.
-   */
   if (error) {
     if (imagePath) {
       await supabase.storage.from("skill-images").remove([imagePath]);
@@ -416,21 +275,33 @@ export const addSkill = async (payload: AddSkillPayload) => {
     throw new Error(error.message);
   }
 
+  if (payload.skill_type === "offered") {
+    const { error: sessionOptionError } = await supabase
+      .from("user_skill_sessions")
+      .insert({
+        user_skill_id: data.id,
+        duration_minutes: 60,
+        token_rate: 5,
+        is_active: true,
+      });
+
+    if (sessionOptionError) {
+      await supabase.from("user_skills").delete().eq("id", data.id);
+
+      if (imagePath) {
+        await supabase.storage.from("skill-images").remove([imagePath]);
+      }
+
+      throw new Error(
+        `Failed to create the default 60-minute session option: ${sessionOptionError.message}`,
+      );
+    }
+  }
+
   return data;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Remove User Skill
-|--------------------------------------------------------------------------
-*/
-
 export const removeSkill = async (skillId: string) => {
-  /*
-   * Get the skill first so we can remove
-   * the user's course image after deleting
-   * the user_skills record.
-   */
   const { data: skill, error: skillFetchError } = await supabase
     .from("user_skills")
     .select("image_url")
@@ -441,9 +312,6 @@ export const removeSkill = async (skillId: string) => {
     throw new Error(skillFetchError.message);
   }
 
-  /*
-   * Delete user_skills record
-   */
   const { error } = await supabase
     .from("user_skills")
     .delete()
@@ -453,12 +321,6 @@ export const removeSkill = async (skillId: string) => {
     throw new Error(error.message);
   }
 
-  /*
-   * Remove user's course image from Storage.
-   *
-   * We only do this for images belonging to
-   * the user-skills record.
-   */
   if (skill?.image_url) {
     try {
       const imageUrl = new URL(skill.image_url);
@@ -472,24 +334,11 @@ export const removeSkill = async (skillId: string) => {
           imageUrl.pathname.substring(markerIndex + marker.length),
         );
 
-        /*
-         * Only remove user images.
-         *
-         * We never remove:
-         *
-         * skill-images/admin/...
-         */
         if (imagePath.startsWith("users/")) {
           await supabase.storage.from("skill-images").remove([imagePath]);
         }
       }
-    } catch {
-      /*
-       * The database record has already been deleted.
-       * If image cleanup fails, don't fail the entire
-       * delete operation.
-       */
-    }
+    } catch {}
   }
 
   return true;
