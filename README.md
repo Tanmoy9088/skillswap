@@ -88,11 +88,6 @@ The frontend handles presentation and client state, while Supabase provides auth
 A simplified structure:
 
 ```text
-File Tree: skillswap
-Generated on: 9/17/2026, 3:47:48 PM
-Root path: d:\NextJs_Project\skillswap
-
-────────────────────────────────────────────────────────────────────────────────
 
 ├── 📁 public/
 │   ├── 📁 images/
