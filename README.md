@@ -88,55 +88,325 @@ The frontend handles presentation and client state, while Supabase provides auth
 A simplified structure:
 
 ```text
-src/
-├── app/
-│   ├── admin/
-│   │   ├── dashboard/
-│   │   ├── users/
-│   │   ├── skills/
-│   │   └── sessions/
-│   ├── bookings/
-│   │   └── [swapId]/
-│   ├── dashboard/
-│   ├── mentors/
-│   │   └── [authUserId]/
-│   ├── profile/
-│   ├── requests/
-│   ├── skills/
-│   ├── swaps/
-│   ├── wallet/
-│   ├── login/
-│   ├── signup/
-│   ├── loading.tsx
-│   ├── error.tsx
-│   └── not-found.tsx
-│
-├── components/
-│   ├── admin/
-│   ├── dashboard/
-│   ├── mentors/
-│   ├── profile/
-│   ├── swaps/
-│   ├── wallet/
-│   └── ...
-│
-├── hooks/
-│   ├── auth/
-│   ├── mentors/
-│   ├── swaps/
-│   └── ...
-│
-├── lib/
-│   ├── profile.ts
-│   ├── swaps.ts
-│   ├── wallet.ts
-│   ├── mentorAvailability.ts
-│   └── ...
-│
-├── store/
-│   └── ...
-│
-└── proxy.ts
+File Tree: skillswap
+Generated on: 9/17/2026, 3:47:48 PM
+Root path: d:\NextJs_Project\skillswap
+
+────────────────────────────────────────────────────────────────────────────────
+
+├── 📁 public/
+│   ├── 📁 images/
+│   │   ├── 🖼️ Collaborative-learning-environment.png
+│   │   ├── 🖼️ HomePageHero.png
+│   │   ├── 🖼️ Icon.svg
+│   │   ├── 🖼️ community1.png
+│   │   ├── 🖼️ community2.png
+│   │   └── 🖼️ og-image.png
+│   ├── 🖼️ file.svg
+│   ├── 🖼️ globe.svg
+│   ├── 🖼️ iconv1.svg
+│   ├── 🖼️ iconv2.svg
+│   ├── 🖼️ iconv3.svg
+│   ├── 🖼️ image.png
+│   ├── 🖼️ next.svg
+│   ├── 🖼️ og-image.png
+│   ├── 🖼️ vercel.svg
+│   └── 🖼️ window.svg
+├── 📁 src/
+│   ├── 📁 app/
+│   │   ├── 📁 (auth)/
+│   │   │   ├── 📁 login/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   └── 📁 signup/
+│   │   │       └── 📄 page.tsx
+│   │   ├── 📁 (user)/
+│   │   │   ├── 📁 about/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 availability/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 bookings/
+│   │   │   │   ├── 📁 [swapId]/
+│   │   │   │   │   ├── 📄 BookingDateSelector.tsx
+│   │   │   │   │   ├── 📄 BookingStepIndicator.tsx
+│   │   │   │   │   ├── 📄 BookingSummary.tsx
+│   │   │   │   │   ├── 📄 BookingTimeSelector.tsx
+│   │   │   │   │   ├── 📄 SessionOptionCard.tsx
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 community/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 contact/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 dashboard/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 feature/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 help/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 how-it-works/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 mentors/
+│   │   │   │   ├── 📁 [authUserId]/
+│   │   │   │   │   ├── 📄 MentorProfileClient.tsx
+│   │   │   │   │   ├── 📄 opengraph-image.tsx
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📄 MentorsClient.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 pricing/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 privacy/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 requests/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 sessions/
+│   │   │   ├── 📁 skills/
+│   │   │   │   ├── 📁 [skillName]/
+│   │   │   │   │   ├── 📄 SkillDetailsClient.tsx
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 success-stories/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 swaps/
+│   │   │   │   ├── 📁 [swapId]/
+│   │   │   │   │   ├── 📁 session/
+│   │   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 terms/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📁 wallet/
+│   │   │   │   └── 📄 page.tsx
+│   │   │   ├── 📄 layout.tsx
+│   │   │   └── 📄 page.tsx
+│   │   ├── 📁 admin/
+│   │   │   ├── 📁 dashboard/
+│   │   │   │   ├── 📁 session-management/
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📁 skill-management/
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   ├── 📁 user-management/
+│   │   │   │   │   └── 📄 page.tsx
+│   │   │   │   └── 📄 page.tsx
+│   │   │   └── 📄 layout.tsx
+│   │   ├── 📁 api/
+│   │   │   ├── 📁 livekit/
+│   │   │   │   └── 📁 token/
+│   │   │   │       └── 📄 route.ts
+│   │   │   └── 📁 payments/
+│   │   │       └── 📁 razorpay/
+│   │   │           ├── 📁 create-order/
+│   │   │           │   └── 📄 route.ts
+│   │   │           ├── 📁 verify/
+│   │   │           │   └── 📄 route.ts
+│   │   │           └── 📁 webhook/
+│   │   │               └── 📄 route.ts
+│   │   ├── 📁 profile/
+│   │   │   └── 📄 page.tsx
+│   │   ├── 📄 error.tsx
+│   │   ├── 📄 global-error.tsx
+│   │   ├── 🎨 globals.css
+│   │   ├── 📄 layout.tsx
+│   │   ├── 📄 loading.tsx
+│   │   ├── 📄 not-found.tsx
+│   │   ├── 📄 provider.tsx
+│   │   ├── 📄 robotics.ts
+│   │   └── 📄 sitemap.ts
+│   ├── 📁 components/
+│   │   ├── 📁 admin/
+│   │   │   ├── 📁 sessions/
+│   │   │   │   ├── 📄 AdminSessionsSkeleton.tsx
+│   │   │   │   ├── 📄 SessionDetailsModal.tsx
+│   │   │   │   ├── 📄 SessionFilters.tsx
+│   │   │   │   ├── 📄 SessionStats.tsx
+│   │   │   │   └── 📄 SessionsTable.tsx
+│   │   │   ├── 📄 AdminAddSkillModal.tsx
+│   │   │   └── 📄 AdminUsersPage.tsx
+│   │   ├── 📁 community&stories/
+│   │   │   └── 📄 StorySection.tsx
+│   │   ├── 📁 dashboard/
+│   │   │   └── 📄 DashboardSessionCalendar.tsx
+│   │   ├── 📁 lib/
+│   │   │   └── 📄 confirmToast.tsx
+│   │   ├── 📁 mentors/
+│   │   │   ├── 📄 MentorCard.tsx
+│   │   │   ├── 📄 MentorGridSkeleton.tsx
+│   │   │   ├── 📄 MentorProfile.tsx
+│   │   │   ├── 📄 SessionOptionsManager.tsx
+│   │   │   └── 📄 SwapRequestModal.tsx
+│   │   ├── 📁 notifications/
+│   │   │   ├── 📄 NotificationBell.tsx
+│   │   │   └── 📄 NotificationDropdown.tsx
+│   │   ├── 📁 requests/
+│   │   │   └── 📄 SwapRequestCard.tsx
+│   │   ├── 📁 skills/
+│   │   │   ├── 📄 FeaturedCurators.tsx
+│   │   │   ├── 📄 LoadMoreButton.tsx
+│   │   │   ├── 📄 RecommendedSkills.tsx
+│   │   │   ├── 📄 SkillCard.tsx
+│   │   │   ├── 📄 SkillDetails.tsx
+│   │   │   ├── 📄 SkillFilter.tsx
+│   │   │   ├── 📄 SkillGrid.tsx
+│   │   │   └── 📄 SkillSearch.tsx
+│   │   ├── 📁 swaps/
+│   │   │   ├── 📄 RateMentorModal.tsx
+│   │   │   ├── 📄 ReScheduleSessionForm.tsx
+│   │   │   ├── 📄 ReScheduleSessionHeader.tsx
+│   │   │   ├── 📄 ReScheduleSessionReview.tsx
+│   │   │   ├── 📄 RescheduleSessionModal.tsx
+│   │   │   ├── 📄 ScheduleSessionAvailability.tsx
+│   │   │   ├── 📄 ScheduleSessionConfirmation.tsx
+│   │   │   ├── 📄 ScheduleSessionHeader.tsx
+│   │   │   ├── 📄 ScheduleSessionModal.tsx
+│   │   │   ├── 📄 ScheduleSessionOptions.tsx
+│   │   │   ├── 📄 ScheduleSessionUtils.tsx
+│   │   │   ├── 📄 SwapCard.tsx
+│   │   │   ├── 📄 SwapCardHeader.tsx
+│   │   │   ├── 📄 SwapCardStatusContent.tsx
+│   │   │   ├── 📄 SwapCardUser.tsx
+│   │   │   └── 📄 rescheduleSessionUtils.ts
+│   │   ├── 📁 ui/
+│   │   │   ├── 📄 button.tsx
+│   │   │   ├── 📄 magic-card.tsx
+│   │   │   └── 📄 table.tsx
+│   │   ├── 📁 wallet/
+│   │   │   ├── 📄 RazorpayCheckout.tsx
+│   │   │   ├── 📄 TokenBalanceCard.tsx
+│   │   │   ├── 📄 TokenPackages.tsx
+│   │   │   └── 📄 TokenTransactionHistory.tsx
+│   │   ├── 📄 AddSkillModal.tsx
+│   │   ├── 📄 EditProfileModal.tsx
+│   │   ├── 📄 LoadingSkeleton.tsx
+│   │   └── 📄 ProfileModal.tsx
+│   ├── 📁 hooks/
+│   │   ├── 📁 admin/
+│   │   │   ├── 📄 useAdminAnalytics.ts
+│   │   │   ├── 📄 useAdminPlatformStats.ts
+│   │   │   ├── 📄 useAdminSessions.ts
+│   │   │   ├── 📄 useAdminSkills.ts
+│   │   │   ├── 📄 useAdminUsers.ts
+│   │   │   ├── 📄 useCancelAdminSession.ts
+│   │   │   ├── 📄 useCreateAdminSkill.ts
+│   │   │   ├── 📄 useDeleteAdminSkill.ts
+│   │   │   └── 📄 useToggleAdminUserStatus.ts
+│   │   ├── 📁 mentors/
+│   │   │   ├── 📄 useMentorAvailability.ts
+│   │   │   └── 📄 useMentorAvailabilityForBooking.ts
+│   │   ├── 📁 notifications/
+│   │   │   ├── 📄 useNotificationRealtime.ts
+│   │   │   └── 📄 useNotifications.ts
+│   │   ├── 📁 payments/
+│   │   │   ├── 📄 useCreateRazorpayOrder.ts
+│   │   │   └── 📄 useVerifyRazorpayPayment.ts
+│   │   ├── 📁 skills/
+│   │   │   ├── 📄 useAcceptSwapRequest.ts
+│   │   │   ├── 📄 useAddSkills.ts
+│   │   │   ├── 📄 useAvailableSkills.ts
+│   │   │   ├── 📄 useCancelSwapSession.ts
+│   │   │   ├── 📄 useCompleteSwapSession.ts
+│   │   │   ├── 📄 useConfirmScheduleSwap.ts
+│   │   │   ├── 📄 useCreateSessionOption.ts
+│   │   │   ├── 📄 useCreateSwapRating.ts
+│   │   │   ├── 📄 useCreateSwapRequest.ts
+│   │   │   ├── 📄 useDeactivateSessionOption.ts
+│   │   │   ├── 📄 useMentorProfile.ts
+│   │   │   ├── 📄 useMySessionOptions.ts
+│   │   │   ├── 📄 useMySwap.ts
+│   │   │   ├── 📄 useProposeSwapReschedule.ts
+│   │   │   ├── 📄 useRemoveSkills.ts
+│   │   │   ├── 📄 useRequestScheduleSwap.ts
+│   │   │   ├── 📄 useRespondToReschedule.ts
+│   │   │   ├── 📄 useScheduleSwapSession.ts
+│   │   │   ├── 📄 useSessionOptions.ts
+│   │   │   ├── 📄 useSkillDetails.ts
+│   │   │   ├── 📄 useSkillDiscovery.ts
+│   │   │   ├── 📄 useStartSwapSession.ts
+│   │   │   ├── 📄 useSwapById.ts
+│   │   │   ├── 📄 useSwapRating.ts
+│   │   │   ├── 📄 useSwapRequests.ts
+│   │   │   ├── 📄 useUpdateSessionOption.ts
+│   │   │   ├── 📄 useUpdateSwapRating.ts
+│   │   │   ├── 📄 useUpdateSwapRequest.ts
+│   │   │   └── 📄 useUserSkills.ts
+│   │   ├── 📁 wallet/
+│   │   │   ├── 📄 useTokenBalance.ts
+│   │   │   └── 📄 useTokenTransactions.ts
+│   │   ├── 📄 use-current-profile.ts
+│   │   ├── 📄 use-login.ts
+│   │   ├── 📄 use-logout.ts
+│   │   ├── 📄 use-signUp.ts
+│   │   ├── 📄 use-user.ts
+│   │   ├── 📄 useActiveAccountGuard.ts
+│   │   └── 📄 useUpdateProfile.ts
+│   ├── 📁 layout/
+│   │   ├── 📁 adminLayout/
+│   │   │   ├── 📄 Navbar.tsx
+│   │   │   └── 📄 Sidebar.tsx
+│   │   └── 📁 userLayout/
+│   │       ├── 📄 Footer.tsx
+│   │       └── 📄 Header.tsx
+│   ├── 📁 lib/
+│   │   ├── 📁 admin/
+│   │   │   ├── 📄 adminSessions.ts
+│   │   │   ├── 📄 adminSkills.ts
+│   │   │   ├── 📄 adminStats.ts
+│   │   │   ├── 📄 adminTypes.ts
+│   │   │   ├── 📄 adminUsers.ts
+│   │   │   ├── 📄 adminUtils.ts
+│   │   │   └── 📄 index.ts
+│   │   ├── 📁 notifications/
+│   │   │   ├── 📄 createNotification.ts
+│   │   │   └── 📄 notifications.ts
+│   │   ├── 📁 payments/
+│   │   │   └── 📄 razorpay.ts
+│   │   ├── 📁 supabase/
+│   │   │   ├── 📄 admin.ts
+│   │   │   ├── 📄 client.ts
+│   │   │   ├── 📄 middleware.ts
+│   │   │   └── 📄 server.ts
+│   │   ├── 📄 auth.ts
+│   │   ├── 📄 bookingSchedule.ts
+│   │   ├── 📄 mentorAvailability.ts
+│   │   ├── 📄 mentorProfile.ts
+│   │   ├── 📄 profile.ts
+│   │   ├── 📄 sessionOptions.ts
+│   │   ├── 📄 skillDetails.ts
+│   │   ├── 📄 skills.ts
+│   │   ├── 📄 swapRequests.ts
+│   │   ├── 📄 uploadProfileImage.ts
+│   │   ├── 📄 user.ts
+│   │   ├── 📄 utils.ts
+│   │   └── 📄 wallet.ts
+│   ├── 📁 schemas/
+│   │   ├── 📄 loginSchema.ts
+│   │   └── 📄 signupSchema.ts
+│   ├── 📁 services/
+│   │   ├── 📁 helper/
+│   │   ├── 📁 json/
+│   │   └── 📁 validations/
+│   ├── 📁 store/
+│   │   ├── 📄 globalState.ts
+│   │   ├── 📄 skillDiscovery.ts
+│   │   └── 📄 userManagementStore.ts
+│   ├── 📁 types/
+│   │   ├── 📁 interfaces/
+│   │   │   └── 📄 auth.interface.ts
+│   │   └── 📁 types/
+│   │       ├── 📄 skills.ts
+│   │       └── 📄 swaps.ts
+│   ├── 📁 utils/
+│   └── 📄 proxy.ts
+├── ⚙️ .gitignore
+├── 📝 README.md
+├── ⚙️ components.json
+├── 📄 eslint.config.mjs
+├── 📄 next.config.ts
+├── ⚙️ package-lock.json
+├── ⚙️ package.json
+├── 📄 postcss.config.mjs
+└── ⚙️ tsconfig.json
+
+────────────────────────────────────────────────────────────────────────────────
+Generated by FileTree Pro Extension
 ```
 
 ---
