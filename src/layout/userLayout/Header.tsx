@@ -2,25 +2,25 @@
 
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ProfileModal from "@/components/ProfileModal";
-import { useCurrentProfile } from "@/hooks/use-current-profile";
 import { useNotificationRealtime } from "@/hooks/notifications/useNotificationRealtime";
+import { useCurrentProfile } from "@/hooks/use-current-profile";
 import { useGlobalStore } from "@/store/globalState";
+import { CalendarClock, ChevronDown, Menu, Sparkles, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { ChevronDown, Menu, Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const Header = () => {
   const pathname = usePathname();
   const { data: profile, isLoading } = useCurrentProfile();
 
-  useNotificationRealtime(profile?.auth_user_id);
+  const openProfile = useGlobalStore((state) => state.openProfile);
 
   const [showHeader, setShowHeader] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const openProfile = useGlobalStore((state) => state.openProfile);
+  useNotificationRealtime(profile?.auth_user_id);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -70,6 +70,9 @@ const Header = () => {
   const isLinkActive = (href: string) =>
     pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
+  const isAvailabilityActive =
+    pathname === "/availability" || pathname.startsWith("/availability/");
+
   const handleMobileLinkClick = () => {
     setMobileMenuOpen(false);
   };
@@ -82,24 +85,21 @@ const Header = () => {
         }`}
       >
         <div className="mx-auto mt-3 max-w-375 px-3 sm:px-5 lg:px-8">
-          <div className="relative rounded-2xl border border-white/70 bg-white/90 shadow-[0_8px_30px_rgba(79,70,229,0.08)] backdrop-blur-xl">
+          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.08)]">
             <div className="flex h-18 items-center px-4 sm:px-6">
-              <Link
-                href="/"
-                className="group flex shrink-0 items-center gap-2.5"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 via-indigo-500 to-violet-600 shadow-md shadow-indigo-200 transition-transform duration-200 group-hover:scale-105">
+              <Link href="/" className="group flex shrink-0 items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 to-violet-600 shadow-md shadow-indigo-200 transition-all duration-200 group-hover:shadow-lg group-hover:shadow-indigo-200">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
 
                 <div className="hidden sm:block">
-                  <h1 className="text-xl font-extrabold tracking-tight text-gray-900">
+                  <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
                     Skill
                     <span className="text-indigo-600">Swap</span>
-                    <span className="text-violet-500">+</span>
+                    <span className="text-violet-600">+</span>
                   </h1>
 
-                  <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-gray-400">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                     Learn • Teach • Grow
                   </p>
                 </div>
@@ -113,10 +113,10 @@ const Header = () => {
                     <Link
                       key={link.href}
                       href={link.href}
-                      className={`relative rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200 ${
+                      className={`relative rounded-lg px-3 py-2 text-[13px] font-semibold transition-all duration-200 ${
                         isActive
-                          ? "bg-indigo-50 text-indigo-600 shadow-sm"
-                          : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                          ? "bg-indigo-50 text-indigo-700"
+                          : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
                       }`}
                     >
                       {link.name}
@@ -129,55 +129,75 @@ const Header = () => {
                 })}
               </nav>
 
-              <div className="ml-auto hidden shrink-0 items-center gap-3 xl:flex">
+              <div className="ml-auto hidden shrink-0 items-center gap-2 xl:flex">
                 {isLoading ? (
                   <>
-                    <div className="h-10 w-24 animate-pulse rounded-xl bg-gray-100" />
-                    <div className="h-11 w-11 animate-pulse rounded-full bg-gray-100" />
+                    <div className="h-10 w-24 animate-pulse rounded-xl bg-slate-100" />
+                    <div className="h-11 w-11 animate-pulse rounded-full bg-slate-100" />
                   </>
                 ) : profile ? (
                   <>
+                    <Link
+                      href="/availability"
+                      className={`group flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-all duration-200 ${
+                        isAvailabilityActive
+                          ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+                      }`}
+                    >
+                      <CalendarClock
+                        className={`h-4 w-4 ${
+                          isAvailabilityActive
+                            ? "text-indigo-600"
+                            : "text-slate-400 group-hover:text-indigo-600"
+                        }`}
+                      />
+                      Availability
+                    </Link>
+
+                    <div className="mx-1 h-7 w-px bg-slate-200" />
+
                     <NotificationBell />
 
                     <button
                       type="button"
                       onClick={openProfile}
-                      className="group flex items-center gap-2.5 rounded-xl border border-gray-100 bg-gray-50/80 p-1.5 pr-3 transition-all duration-200 hover:border-indigo-100 hover:bg-indigo-50/60 hover:shadow-md hover:shadow-indigo-100"
+                      className="group flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 p-1.5 pr-3 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50/60 hover:shadow-sm"
                     >
                       <div className="relative">
-                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-indigo-500 to-violet-500 p-0.5">
+                        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-indigo-500 to-violet-500 p-0.5">
                           <div className="h-full w-full overflow-hidden rounded-full bg-white">
                             <Image
                               src={profile.profile_img || "/image.png"}
                               alt={profile.name}
-                              width={40}
-                              height={40}
+                              width={36}
+                              height={36}
                               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
                           </div>
                         </div>
 
-                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+                        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
                       </div>
 
-                      <div className="max-w-37.5 text-left">
-                        <p className="truncate text-sm font-bold text-gray-900">
+                      <div className="max-w-32 text-left">
+                        <p className="truncate text-sm font-bold text-slate-900">
                           {profile.name}
                         </p>
 
-                        <p className="truncate text-[11px] text-gray-400">
+                        <p className="truncate text-[10px] text-slate-400">
                           {profile.email}
                         </p>
                       </div>
 
-                      <ChevronDown className="h-4 w-4 text-gray-400 transition-colors group-hover:text-indigo-500" />
+                      <ChevronDown className="h-4 w-4 text-slate-400 transition-colors group-hover:text-indigo-500" />
                     </button>
                   </>
                 ) : (
                   <>
                     <Link
                       href="/login"
-                      className="rounded-xl px-4 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                      className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
                     >
                       Sign In
                     </Link>
@@ -222,7 +242,7 @@ const Header = () => {
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen((prev) => !prev)}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                   aria-label={
                     mobileMenuOpen
                       ? "Close navigation menu"
@@ -240,7 +260,7 @@ const Header = () => {
             </div>
 
             {mobileMenuOpen && (
-              <div className="border-t border-gray-100 px-4 pb-4 pt-3 xl:hidden">
+              <div className="border-t border-slate-100 bg-slate-50/50 px-4 pb-4 pt-3 xl:hidden">
                 <nav className="flex flex-col gap-1">
                   {links.map((link) => {
                     const isActive = isLinkActive(link.href);
@@ -252,8 +272,8 @@ const Header = () => {
                         onClick={handleMobileLinkClick}
                         className={`flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
                           isActive
-                            ? "bg-indigo-50 text-indigo-600"
-                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            ? "bg-indigo-50 text-indigo-700"
+                            : "text-slate-600 hover:bg-white hover:text-slate-900"
                         }`}
                       >
                         <span>{link.name}</span>
@@ -264,13 +284,34 @@ const Header = () => {
                       </Link>
                     );
                   })}
+
+                  {profile && !isLoading && (
+                    <Link
+                      href="/availability"
+                      onClick={handleMobileLinkClick}
+                      className={`mt-1 flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+                        isAvailabilityActive
+                          ? "bg-indigo-50 text-indigo-700"
+                          : "text-slate-600 hover:bg-white hover:text-slate-900"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <CalendarClock className="h-4 w-4" />
+                        Availability
+                      </span>
+
+                      {isAvailabilityActive && (
+                        <span className="h-2 w-2 rounded-full bg-indigo-600" />
+                      )}
+                    </Link>
+                  )}
                 </nav>
 
                 {!profile && !isLoading && (
-                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-gray-100 pt-3">
+                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-200 pt-3">
                     <Link
                       href="/login"
-                      className="flex items-center justify-center rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                      className="flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                     >
                       Sign In
                     </Link>
@@ -288,7 +329,7 @@ const Header = () => {
                   <button
                     type="button"
                     onClick={openProfile}
-                    className="mt-3 flex w-full items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-3 text-left transition hover:border-indigo-100 hover:bg-indigo-50"
+                    className="mt-3 flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-indigo-100 hover:bg-indigo-50"
                   >
                     <div className="relative">
                       <Image
@@ -296,23 +337,23 @@ const Header = () => {
                         alt={profile.name}
                         width={42}
                         height={42}
-                        className="h-10.4 w-10.5 rounded-full object-cover ring-2 ring-indigo-100"
+                        className="h-10 w-10 rounded-full object-cover ring-2 ring-indigo-100"
                       />
 
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-gray-900">
+                      <p className="truncate text-sm font-bold text-slate-900">
                         {profile.name}
                       </p>
 
-                      <p className="truncate text-xs text-gray-400">
+                      <p className="truncate text-xs text-slate-400">
                         {profile.email}
                       </p>
                     </div>
 
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                    <ChevronDown className="h-4 w-4 text-slate-400" />
                   </button>
                 )}
               </div>
