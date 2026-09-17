@@ -85,7 +85,7 @@ const Header = () => {
         }`}
       >
         <div className="mx-auto mt-3 max-w-375 px-3 sm:px-5 lg:px-8">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.08)]">
+          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.08)]">
             <div className="flex h-18 items-center px-4 sm:px-6">
               <Link href="/" className="group flex shrink-0 items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 to-violet-600 shadow-md shadow-indigo-200 transition-all duration-200 group-hover:shadow-lg group-hover:shadow-indigo-200">
