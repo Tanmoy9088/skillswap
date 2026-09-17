@@ -157,7 +157,7 @@ const getNotificationRoute = (type: string, relatedId: string | null) => {
       return `/swaps/${relatedId}`;
 
     case "token_purchase":
-      return `/tokens`;
+      return `/wallet`;
 
     default:
       return null;

@@ -4,14 +4,18 @@ import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Calendar,
+  CheckCircle,
   Clock,
   Coins,
   PlayCircle,
   User,
 } from "lucide-react";
+import { toast } from "sonner";
+
+import Image from "next/image";
 
 import { useSwapById } from "@/hooks/skills/useSwapById";
-import Image from "next/image";
+import { useCompleteSwapSession } from "@/hooks/skills/useCompleteSwapSession";
 
 export default function SwapDetailsPage() {
   const params = useParams();
@@ -20,6 +24,8 @@ export default function SwapDetailsPage() {
   const swapId = params.swapId as string;
 
   const { data: swap, isLoading, error } = useSwapById(swapId);
+
+  const completeSession = useCompleteSwapSession();
 
   if (isLoading) {
     return (
@@ -65,10 +71,21 @@ export default function SwapDetailsPage() {
 
   const isCancelled = swap.status === "cancelled";
 
+  const handleCompleteSession = async () => {
+    try {
+      await completeSession.mutateAsync(swap.id);
+
+      toast.success("Session completed successfully!");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to complete session.",
+      );
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-4xl">
-        {/* Back */}
         <button
           type="button"
           onClick={() => router.push("/swaps")}
@@ -78,7 +95,6 @@ export default function SwapDetailsPage() {
           Back
         </button>
 
-        {/* Header */}
         <div className="rounded-2xl border bg-white p-6 shadow-sm sm:p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -94,9 +110,7 @@ export default function SwapDetailsPage() {
             <StatusBadge status={swap.status} />
           </div>
 
-          {/* Participants */}
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {/* Learner */}
             <div className="rounded-xl border bg-gray-50 p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 Learner
@@ -127,7 +141,6 @@ export default function SwapDetailsPage() {
               </div>
             </div>
 
-            {/* Mentor */}
             <div className="rounded-xl border bg-gray-50 p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                 Mentor
@@ -159,7 +172,6 @@ export default function SwapDetailsPage() {
             </div>
           </div>
 
-          {/* Session information */}
           <div className="mt-6 rounded-xl border p-5">
             <h2 className="font-semibold text-gray-900">Session Details</h2>
 
@@ -196,7 +208,6 @@ export default function SwapDetailsPage() {
             </div>
           </div>
 
-          {/* Session actions */}
           {isScheduled && (
             <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5">
               <h2 className="font-semibold text-blue-900">Session Scheduled</h2>
@@ -217,18 +228,34 @@ export default function SwapDetailsPage() {
                   </h2>
 
                   <p className="mt-1 text-sm text-green-700">
-                    The session has started. You can join the video call now.
+                    The session has started. Join the session and complete it
+                    when you are finished.
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => router.push(`/swaps/${swap.id}/session`)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-green-700"
-                >
-                  <PlayCircle size={19} />
-                  Join Session
-                </button>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/swaps/${swap.id}/session`)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-green-700"
+                  >
+                    <PlayCircle size={19} />
+                    Join Session
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCompleteSession}
+                    disabled={completeSession.isPending}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <CheckCircle size={19} />
+
+                    {completeSession.isPending
+                      ? "Completing..."
+                      : "Complete Session"}
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -253,7 +280,6 @@ export default function SwapDetailsPage() {
             </div>
           )}
 
-          {/* Debug information */}
           <div className="mt-8 rounded-xl bg-gray-950 p-5 text-sm text-gray-300">
             <p className="font-semibold text-white">Current Status</p>
 
