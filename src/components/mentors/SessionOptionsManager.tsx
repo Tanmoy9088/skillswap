@@ -210,45 +210,44 @@ export default function SessionOptionsManager({
           {sessionOptions.map((option) => (
             <div
               key={option.id}
-              className="rounded-xl border border-gray-200 bg-white p-4"
+              className="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white px-4 pt-2 pb-4"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50">
-                    <Clock3 size={18} className="text-indigo-600" />
+              <div className="flex justify-end gap-1">
+                <button
+                  type="button"
+                  onClick={() => handleEdit(option)}
+                  className="flex h-6 w-6 items-center justify-center rounded-lg text-gray-400 bg-yellow-50 transition hover:bg-indigo-50 hover:text-indigo-600"
+                  aria-label="Edit session option"
+                >
+                  <Pencil size={12} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDeactivate(option)}
+                  disabled={deactivateMutation.isPending}
+                  className="flex h-6 w-6 items-center justify-center rounded-lg text-gray-400 bg-red-50 transition hover:bg-red-100 hover:text-red-600 disabled:opacity-50"
+                  aria-label="Remove session option"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between ">
+                <div className="flex items-center gap-1">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50">
+                    <Clock3 size={15} className="text-indigo-600" />
                   </div>
 
                   <div>
-                    <p className="font-bold text-gray-900">
+                    <p className="font-bold text-gray-900 text-xs">
                       {option.duration_minutes} minutes
                     </p>
 
-                    <p className="mt-0.5 flex items-center gap-1 text-sm text-indigo-600">
+                    <p className="mt-0.5 flex items-center text-xs gap-1 text-indigo-600">
                       <Coins size={14} />
                       {option.token_rate} tokens
                     </p>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => handleEdit(option)}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-indigo-50 hover:text-indigo-600"
-                    aria-label="Edit session option"
-                  >
-                    <Pencil size={15} />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDeactivate(option)}
-                    disabled={deactivateMutation.isPending}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                    aria-label="Remove session option"
-                  >
-                    <X size={17} />
-                  </button>
                 </div>
               </div>
             </div>

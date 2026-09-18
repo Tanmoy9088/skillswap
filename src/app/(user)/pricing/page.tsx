@@ -28,8 +28,8 @@ const PricingPage = () => {
           </p>
         </section>
         {/*Bento grid */}
-        <section className="max-w-7xl mx-auto grid grid-cols-12 gap-6">
-          <div className="col-span-8 p-10 rounded-[8px] bg-[#F2F3FF] ">
+        <section className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 justify-center">
+          <div className="colspan-1 md:col-span-8 p-10 rounded-[8px] bg-[#F2F3FF] ">
             <div className="flex flex-col gap-4 ">
               <div className="w-12 py-3 rounded-[12px] bg-[#E2DFFF] flex justify-center">
                 <Timer />
@@ -38,15 +38,15 @@ const PricingPage = () => {
                 1 Token = 1 Hour
               </h2>
               <p className=" text-lg leading-7 text-[#445D99] ">
-                Every skill is valued equally by time. Whether you&apos;re teaching
-                quantum physics or artisanal baking, one hour of your expertise
-                earns you one token to spend on any other skill in our
+                Every skill is valued equally by time. Whether you&apos;re
+                teaching quantum physics or artisanal baking, one hour of your
+                expertise earns you one token to spend on any other skill in our
                 marketplace.
               </p>
               <div className="pt-12 flex">{/* <Image /> */}</div>
             </div>
           </div>
-          <div className="p-8 rounded-[8px] col-span-4 flex flex-col justify-between bg-linear-to-l from-[#4D44E3] to-[#4034D7]">
+          <div className="p-8 rounded-[8px] col-span-1 md:col-span-4 flex flex-col justify-between bg-linear-to-l from-[#4D44E3] to-[#4034D7]">
             <div className="flex flex-col gap-2">
               <h3 className="font-bold text-2xl leading-8 text-[#FAF6FF]">
                 Onboarding Bonus
@@ -84,7 +84,7 @@ const PricingPage = () => {
                 algorithms.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-8">
               <div className="flex flex-col p-8 bg-[#FFFFFF] rounded-[8px]">
                 <div className="flex flex-col gap-2 pb-32">
                   <p className="font-bold text-sm leading-5 text-[#445d99]">

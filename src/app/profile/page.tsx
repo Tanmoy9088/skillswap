@@ -9,7 +9,6 @@ import {
   Pencil,
   Plus,
   Sparkles,
-  Trash2,
   UserRound,
 } from "lucide-react";
 
@@ -21,7 +20,8 @@ import { useGlobalStore } from "@/store/globalState";
 import AddSkillModal from "@/components/AddSkillModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import LoadingSkeleton from "@/components/LoadingSkeleton";
-import SessionOptionsManager from "@/components/mentors/SessionOptionsManager";
+import SkillProfileCard from "@/components/skills/SkillProfileCard";
+import EmptySkills from "@/components/skills/EmptySkills";
 
 export default function ProfilePage() {
   const { data: profile, isLoading: profileLoading } = useCurrentProfile();
@@ -81,7 +81,7 @@ export default function ProfilePage() {
               {/* Profile information */}
               <div className="-mt-14 flex flex-col gap-4 sm:flex-row sm:items-end">
                 {/* Avatar */}
-                <div className="relative">
+                <div className="relative w-fit">
                   <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-indigo-100 shadow-lg">
                     <Image
                       src={profile?.profile_img || "/image.png"}
@@ -92,13 +92,13 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  <div className="absolute bottom-1 right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-green-500">
+                  <div className="absolute bottom-[5%] right-[5%] flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-green-500">
                     <CheckCircle2 size={15} className="text-white" />
                   </div>
                 </div>
 
                 {/* Name / email */}
-                <div className="pb-1">
+                <div className="">
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
                       {profile?.name}
@@ -303,214 +303,5 @@ export default function ProfilePage() {
       <AddSkillModal />
       <EditProfileModal />
     </main>
-  );
-}
-
-/*
-|--------------------------------------------------------------------------
-| Skill Profile Card
-|--------------------------------------------------------------------------
-*/
-
-function SkillProfileCard({
-  skill,
-  type,
-  isRemoving,
-  onRemove,
-}: {
-  skill: {
-    id: string;
-    skill_type: "offered" | "wanted";
-    proficiency_level?: string | null;
-    description?: string | null;
-
-    skills: {
-      id: string;
-      name: string;
-      category: string | null;
-      description: string | null;
-      image_url: string | null;
-      is_active: boolean;
-    } | null;
-  };
-
-  type: "offered" | "wanted";
-  isRemoving: boolean;
-  onRemove: () => void;
-}) {
-  const isOffered = type === "offered";
-
-  /*
-   * Master skill comes from the skills table.
-   */
-  const masterSkill = skill.skills;
-
-  /*
-   * Safety check.
-   */
-  if (!masterSkill) {
-    return null;
-  }
-
-  return (
-    <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
-      {/* ========================================================= */}
-      {/* Image */}
-      {/* ========================================================= */}
-
-      <div className="relative h-44 overflow-hidden bg-indigo-50">
-        {masterSkill.image_url ? (
-          <Image
-            src={masterSkill.image_url}
-            alt={masterSkill.name}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div
-            className={`flex h-full items-center justify-center ${
-              isOffered ? "bg-indigo-50" : "bg-green-50"
-            }`}
-          >
-            <span
-              className={`text-6xl font-bold ${
-                isOffered ? "text-indigo-200" : "text-green-200"
-              }`}
-            >
-              {masterSkill.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        )}
-
-        {/* Type badge */}
-        <span
-          className={`absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold shadow-sm ${
-            isOffered ? "bg-white text-indigo-600" : "bg-white text-green-600"
-          }`}
-        >
-          {isOffered ? "I Offer" : "I Want"}
-        </span>
-
-        {/* Remove */}
-        <button
-          type="button"
-          disabled={isRemoving}
-          onClick={onRemove}
-          aria-label={`Remove ${masterSkill.name}`}
-          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
-
-      {/* ========================================================= */}
-      {/* Content */}
-      {/* ========================================================= */}
-
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900">{masterSkill.name}</h3>
-
-        {/* Category */}
-        {masterSkill.category && (
-          <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-400">
-            {masterSkill.category}
-          </p>
-        )}
-
-        {/* Proficiency */}
-        {skill.proficiency_level && (
-          <div className="mt-3">
-            <span
-              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                isOffered
-                  ? "bg-indigo-50 text-indigo-600"
-                  : "bg-green-50 text-green-600"
-              }`}
-            >
-              {skill.proficiency_level}
-            </span>
-          </div>
-        )}
-
-        {/* Personal description */}
-        {skill.description && (
-          <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-500">
-            {skill.description}
-          </p>
-        )}
-
-        {/* ======================================================= */}
-        {/* Mentor Session Options */}
-        {/* ======================================================= */}
-
-        {isOffered && (
-          <div className="mt-5 border-t border-gray-100 pt-5">
-            <SessionOptionsManager userSkillId={skill.id} />
-          </div>
-        )}
-      </div>
-    </article>
-  );
-}
-
-/*
-|--------------------------------------------------------------------------
-| Empty Skills
-|--------------------------------------------------------------------------
-*/
-
-function EmptySkills({
-  type,
-  onAdd,
-}: {
-  type: "offered" | "wanted";
-  onAdd: () => void;
-}) {
-  const isOffered = type === "offered";
-
-  return (
-    <div
-      className={`rounded-2xl border-2 border-dashed p-10 text-center ${
-        isOffered
-          ? "border-indigo-100 bg-indigo-50/40"
-          : "border-green-100 bg-green-50/40"
-      }`}
-    >
-      <div
-        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${
-          isOffered ? "bg-indigo-100" : "bg-green-100"
-        }`}
-      >
-        {isOffered ? (
-          <Sparkles className="h-6 w-6 text-indigo-600" />
-        ) : (
-          <BookOpen className="h-6 w-6 text-green-600" />
-        )}
-      </div>
-
-      <h3 className="mt-4 font-semibold text-gray-900">
-        {isOffered ? "Share your expertise" : "Start your learning journey"}
-      </h3>
-
-      <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-        {isOffered
-          ? "Add a skill you're confident teaching to help other members."
-          : "Add a skill you'd like to learn from someone in the community."}
-      </p>
-
-      <button
-        type="button"
-        onClick={onAdd}
-        className={`mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white ${
-          isOffered
-            ? "bg-indigo-600 hover:bg-indigo-700"
-            : "bg-green-600 hover:bg-green-700"
-        }`}
-      >
-        <Plus size={17} />
-        Add Skill
-      </button>
-    </div>
   );
 }
