@@ -1,5 +1,5 @@
 import { CheckCircle2, Clock, Coins, Video, XCircle } from "lucide-react";
-import { BookingSwap } from "./page";
+import { BookingSwap } from "../../app/(user)/bookings/page";
 
 type BookingStatus = "scheduled" | "in_progress" | "completed" | "cancelled";
 const statusStyles: Record<BookingStatus, string> = {
