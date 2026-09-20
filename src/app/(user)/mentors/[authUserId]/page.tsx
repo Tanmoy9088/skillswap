@@ -3,24 +3,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 
 import MentorProfileClient from "./MentorProfileClient";
-
-interface MentorProfilePageProps {
-  params: Promise<{
-    authUserId: string;
-  }>;
-}
-
-interface MentorProfileData {
-  profile?: {
-    name?: string | null;
-    bio?: string | null;
-    profile_img?: string | null;
-  };
-
-  skills?: Array<{
-    skill_name?: string | null;
-  }>;
-}
+import { MentorProfileData, MentorProfilePageProps } from "@/types/interfaces/mentorProfile.interface";
 
 async function getMentorForSeo(
   authUserId: string,
