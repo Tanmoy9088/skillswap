@@ -37,11 +37,6 @@ export default function RequestsPage() {
     );
   }
 
-  //   const incomingRequests = requests.filter(
-  //     (request) =>
-  //       request.mentor_auth_user_id !==
-  //       request.requester_auth_user_id
-  //   );
   const incomingRequests = requests;
   return (
     <main className="min-h-screen bg-[#F7F7FF] px-6 py-12">

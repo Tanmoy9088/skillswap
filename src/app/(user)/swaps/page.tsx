@@ -7,10 +7,11 @@ import { useMySwaps } from "@/hooks/skills/useMySwap";
 import { useCurrentProfile } from "@/hooks/use-current-profile";
 
 import SwapCard from "@/components/swaps/SwapCard";
+import EmptySwapState from "@/components/swaps/EmptySwapState";
 
-type Swap = NonNullable<ReturnType<typeof useMySwaps>["data"]>[number];
+export type Swap = NonNullable<ReturnType<typeof useMySwaps>["data"]>[number];
 
-type SwapView = "learning" | "teaching";
+export type SwapView = "learning" | "teaching";
 
 const SwapsPage = () => {
   const [activeView, setActiveView] = useState<SwapView>("learning");
@@ -24,9 +25,7 @@ const SwapsPage = () => {
     error,
   } = useMySwaps();
 
-  /* ============================================================
-     LOADING
-  ============================================================ */
+  /* LOADING */
 
   if (isUserPending || isSwapsPending) {
     return (
@@ -39,9 +38,7 @@ const SwapsPage = () => {
     );
   }
 
-  /* ============================================================
-     NOT LOGGED IN
-  ============================================================ */
+  /* NOT LOGGED IN */
 
   if (!user) {
     return (
@@ -51,9 +48,7 @@ const SwapsPage = () => {
     );
   }
 
-  /* ============================================================
-     ERROR
-  ============================================================ */
+  /* ERROR */
 
   if (isError) {
     return (
@@ -71,9 +66,7 @@ const SwapsPage = () => {
 
   const currentAuthUserId = user.auth_user_id;
 
-  /* ============================================================
-     FILTER SWAPS
-  ============================================================ */
+  /* FILTER SWAPS */
 
   const learning: Swap[] = swaps.filter(
     (swap: Swap) => swap.learner_auth_user_id === currentAuthUserId,
@@ -82,26 +75,18 @@ const SwapsPage = () => {
   const teaching: Swap[] = swaps.filter(
     (swap: Swap) => swap.mentor_auth_user_id === currentAuthUserId,
   );
-
+  
   const activeSwaps = activeView === "learning" ? learning : teaching;
 
-  /* ============================================================
-     EMPTY STATE CONTENT
-  ============================================================ */
+  /* EMPTY STATE CONTENTS */
 
   const isLearning = activeView === "learning";
-
-  /* ============================================================
-     PAGE
-  ============================================================ */
 
   return (
     <main className="min-h-screen bg-[#F7F8FD]">
       <div className="mx-auto max-w-7xl px-6 py-10">
-        {/* ======================================================
-            PAGE HEADER
-        ======================================================= */}
 
+        {/* PAGE HEADER  */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             My Swaps
@@ -112,10 +97,7 @@ const SwapsPage = () => {
           </p>
         </div>
 
-        {/* ======================================================
-            LEARNING / TEACHING SWITCHER
-        ======================================================= */}
-
+        {/* LEARNING / TEACHING SWITCHER */}
         <div className="mt-8">
           <div className="inline-flex w-full rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm sm:w-auto">
             {/* MY LEARNING */}
@@ -213,9 +195,7 @@ const SwapsPage = () => {
             </span>
           </div>
 
-          {/* ====================================================
-              SWAP CARDS
-          ===================================================== */}
+          {/* SWAP CARDS */}
 
           {activeSwaps.length === 0 ? (
             <EmptySwapState type={activeView} />
@@ -233,46 +213,6 @@ const SwapsPage = () => {
         </section>
       </div>
     </main>
-  );
-};
-
-/* ============================================================
-   EMPTY SWAP STATE
-============================================================ */
-
-interface EmptySwapStateProps {
-  type: SwapView;
-}
-
-const EmptySwapState = ({ type }: EmptySwapStateProps) => {
-  const isLearning = type === "learning";
-
-  return (
-    <div className="rounded-3xl border border-dashed border-gray-300 bg-white p-12 text-center shadow-sm">
-      <div
-        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${
-          isLearning
-            ? "bg-blue-50 text-blue-600"
-            : "bg-purple-50 text-purple-600"
-        }`}
-      >
-        {isLearning ? (
-          <GraduationCap className="h-7 w-7" />
-        ) : (
-          <Users className="h-7 w-7" />
-        )}
-      </div>
-
-      <h3 className="mt-5 text-lg font-semibold text-gray-900">
-        {isLearning ? "No learning swaps yet" : "No teaching swaps yet"}
-      </h3>
-
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
-        {isLearning
-          ? "Find a skill you want to learn and request a swap to start your learning journey."
-          : "When someone requests one of your offered skills and the swap is accepted, it will appear here."}
-      </p>
-    </div>
   );
 };
 

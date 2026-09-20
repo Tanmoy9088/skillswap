@@ -1,14 +1,8 @@
 import { CircleCheck, Timer } from "lucide-react";
 // import React from "react";
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 
 const PricingPage = () => {
   return (
@@ -56,14 +50,17 @@ const PricingPage = () => {
                 receive a welcome gift.
               </p>
               <h3 className="pt-4 font-extrabold text-5xl text-[#FAF6FF]">
-                +2 Tokens
+                +100 Tokens
               </h3>
               <p className="text-sm leading-5 text-[#FAF6FF]">
                 Start your journey with two free hours of learning.
               </p>
-              <button className="mt-8 py-4 bg-[#FFFFFF] rounded-[12px] font-bold leading-6 ">
+              <Link
+                href={"/login"}
+                className="mt-8 py-4 bg-[#FFFFFF] rounded-[12px] font-bold text-center leading-6 "
+              >
                 Claim Here
-              </button>
+              </Link>
             </div>
 
             <div className=""></div>
@@ -191,46 +188,6 @@ const PricingPage = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </section>
-        {/*Token history */}
-        <section className="w-full max-w-7xl mx-auto px-8 pt-12 pb-8 flex flex-col gap-8 rounded-[8px] bg-[#F2F3FF]">
-          <div className="w-full flex justify-between items-center">
-            <div className="flex flex-col gap-2">
-              <h2 className="font-bold text-3xl leading-9 text-[#113069]">
-                Token Activity
-              </h2>
-              <p className="leading-6 text-[#445D99]">
-                A transparent log of your recent skill exchanges.
-              </p>
-            </div>
-            <div className="py-3 px-6 gap-3 border rounded-[12px] border-[#9881F2] bg-[#FFFFFF] ">
-              <p>Current Balance: 4.5 Tokens</p>
-            </div>
-          </div>
-          <div>
-            <Table className="bg-[#FFFFFF] roounded-[8px] drop-shadow-2xl drop-shadow-black/5">
-              <TableCaption>A list of your recent invoices.</TableCaption>
-              <TableHeader className="bg-[#EAEDFF] border-b border-[#98b1f2]">
-                <TableRow>
-                  <TableHead className="font-bold text-xs leading-4 tracking-wide">
-                    TRANSACTION ID
-                  </TableHead>
-                  <TableHead>ACTION/USER</TableHead>
-                  <TableHead>SKILL/DURATION</TableHead>
-                  <TableHead className="text-right">AMOUNT</TableHead>
-                  <TableHead className="text-right">STATUS</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium"></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell></TableCell>
-                  <TableCell className="text-right"></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
           </div>
         </section>
       </main>
