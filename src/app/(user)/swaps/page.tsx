@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { GraduationCap, Loader2, Users } from "lucide-react";
+import { GraduationCap, Users } from "lucide-react";
 
 import { useMySwaps } from "@/hooks/skills/useMySwap";
 import { useCurrentProfile } from "@/hooks/use-current-profile";
 
 import SwapCard from "@/components/swaps/SwapCard";
 import EmptySwapState from "@/components/swaps/EmptySwapState";
+import SwapPageSkeleton from "@/components/swaps/SwapPageSkeleton";
 
 export type Swap = NonNullable<ReturnType<typeof useMySwaps>["data"]>[number];
 
@@ -28,14 +29,7 @@ const SwapsPage = () => {
   /* LOADING */
 
   if (isUserPending || isSwapsPending) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F7F8FD]">
-        <div className="flex items-center gap-2 text-gray-600">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          Loading swaps...
-        </div>
-      </main>
-    );
+    return <SwapPageSkeleton />;
   }
 
   /* NOT LOGGED IN */
@@ -75,7 +69,7 @@ const SwapsPage = () => {
   const teaching: Swap[] = swaps.filter(
     (swap: Swap) => swap.mentor_auth_user_id === currentAuthUserId,
   );
-  
+
   const activeSwaps = activeView === "learning" ? learning : teaching;
 
   /* EMPTY STATE CONTENTS */
@@ -85,7 +79,6 @@ const SwapsPage = () => {
   return (
     <main className="min-h-screen bg-[#F7F8FD]">
       <div className="mx-auto max-w-7xl px-6 py-10">
-
         {/* PAGE HEADER  */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
