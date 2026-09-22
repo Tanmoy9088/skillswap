@@ -3,6 +3,7 @@
 import { MagicCard } from "@/components/ui/magic-card";
 import { useSignUp } from "@/hooks/use-signUp";
 import { SignupSchema } from "@/schemas/signupSchema";
+import { useAuthState } from "@/store/authState";
 import { SignupPayload } from "@/types/interfaces/auth.interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
@@ -16,14 +17,17 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 const SignupPage = () => {
   const router = useRouter();
   const { mutate, isPending, error } = useSignUp();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const {
+    showPassword,
+    setShowPassword,
+    showConfirmPassword,
+    setShowConfirmPassword,
+  } = useAuthState();
 
   const {
     register,
@@ -263,7 +267,7 @@ const SignupPage = () => {
 
                     <button
                       type="button"
-                      onClick={() => setShowPassword((value) => !value)}
+                      onClick={() => setShowPassword()}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
@@ -305,7 +309,7 @@ const SignupPage = () => {
 
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword((value) => !value)}
+                      onClick={() => setShowConfirmPassword()}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
                       aria-label={
                         showConfirmPassword

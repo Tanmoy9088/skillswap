@@ -182,9 +182,7 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* ========================================================= */}
         {/* Skills I Offer */}
-        {/* ========================================================= */}
 
         <section className="mt-8">
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -240,10 +238,8 @@ export default function ProfilePage() {
           )}
         </section>
 
-        {/* ========================================================= */}
         {/* Skills I Want */}
-        {/* ========================================================= */}
-
+      
         <section className="mt-10">
           <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>

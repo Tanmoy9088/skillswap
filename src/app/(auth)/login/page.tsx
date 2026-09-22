@@ -4,19 +4,19 @@ import { MagicCard } from "@/components/ui/magic-card";
 import { useLogin } from "@/hooks/use-login";
 import { getCurrentProfile } from "@/lib/profile";
 import { loginSchema } from "@/schemas/loginSchema";
+import { useAuthState } from "@/store/authState";
 import { LoginPayload } from "@/types/interfaces/auth.interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Eye, EyeOff, LockKeyhole, Mail, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 const LoginPage = () => {
   const router = useRouter();
   const { mutate, isPending, error } = useLogin();
-  const [showPassword, setShowPassword] = useState(false);
+  const { showPassword, setShowPassword } = useAuthState();
 
   const {
     register,
@@ -174,7 +174,7 @@ const LoginPage = () => {
 
                     <button
                       type="button"
-                      onClick={() => setShowPassword((value) => !value)}
+                      onClick={() => setShowPassword()}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
