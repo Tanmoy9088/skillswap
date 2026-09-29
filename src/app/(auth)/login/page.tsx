@@ -45,7 +45,7 @@ const LoginPage = () => {
         if (profile?.role === "admin") {
           router.push("/admin/dashboard");
         } else {
-          router.push("/");
+          router.push("/dashboard");
         }
         reset();
       },
